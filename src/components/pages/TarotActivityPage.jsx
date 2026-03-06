@@ -1,0 +1,511 @@
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { RotateCcw, Scroll, Star, Eye } from 'lucide-react'
+import TTSPlayer from '../common/TTSPlayer'
+import MagicButton from '../common/MagicButton'
+
+const TOTAL_CARDS = 10
+const TENSES = ['past', 'present', 'future']
+const TENSE_COLORS = {
+  past:    { border: '#a78bfa', label: '#c4b5fd' },
+  present: { border: '#34d399', label: '#6ee7b7' },
+  future:  { border: '#f59e0b', label: '#fde68a' },
+}
+const TENSE_ICONS = { past: Scroll, present: Star, future: Eye }
+
+// Drives the dynamic header during card selection
+const SELECTION_PROMPTS = [
+  { emoji: '🃏', tense: 'PAST',    sub: 'The cards will reveal your Past · Present · Future!' },
+  { emoji: '⭐', tense: 'PRESENT', sub: 'Your PAST card is chosen! ✨' },
+  { emoji: '🔮', tense: 'FUTURE',  sub: 'Your PRESENT card is chosen! ✨' },
+]
+
+// Pill badge: tense colour + name instead of a plain number
+const TENSE_BADGE = [
+  { label: 'PAST',   bg: '#a78bfa' },
+  { label: 'PRESENT', bg: '#34d399' },
+  { label: 'FUTURE', bg: '#f59e0b' },
+]
+
+/**
+ * Tarot Card Activity Page
+ *
+ * Flow (IA spec):
+ *  Phase 1 – Selection: 10 face-down cards shown, user picks 3 in order.
+ *  Phase 2 – Reveal: selected cards flip one-by-one (Past → Present → Future).
+ *  Phase 3 – Complete: all 3 results visible, Try Again shown.
+ */
+const TarotActivityPage = ({ content, onTryAgain }) => {
+  // selectedOrder[i] = card index (i = 0 first pick, 1 second, 2 third)
+  const [selectedOrder, setSelectedOrder] = useState([])
+  // revealStep: 0=none flipped, 1=past flipped, 2=present flipped, 3=future flipped
+  const [revealStep, setRevealStep] = useState(0)
+  const [phase, setPhase] = useState('selection') // 'selection' | 'revealing' | 'complete'
+
+  const handleCardClick = (cardIdx) => {
+    if (phase !== 'selection') return
+    if (selectedOrder.includes(cardIdx)) return
+    if (selectedOrder.length >= 3) return
+
+    const next = [...selectedOrder, cardIdx]
+    setSelectedOrder(next)
+
+    if (next.length === 3) {
+      // Brief pause so user can see FUTURE badge, then transition to reveal
+      setTimeout(() => {
+        setPhase('revealing')
+        setTimeout(() => setRevealStep(1), 400)
+      }, 700)
+    }
+  }
+
+  // Called by each card's TTSPlayer when its audio finishes.
+  // orderIdx: 0=past, 1=present, 2=future
+  const handleAudioEnded = (orderIdx) => {
+    if (orderIdx === 2) {
+      // Future card done → all complete
+      setPhase('complete')
+    } else {
+      // Short pause before flipping the next card.
+      // Functional updater with Math.max ensures revealStep never decreases,
+      // so re-listens on any card never cause already-flipped cards to unflip.
+      setTimeout(() => setRevealStep(prev => Math.max(prev, orderIdx + 2)), 250)
+    }
+  }
+
+  const tenseForOrder = (orderIdx) => TENSES[orderIdx] // 0→past, 1→present, 2→future
+
+  // Card visual state helper
+  const getCardState = (cardIdx) => {
+    const orderIdx = selectedOrder.indexOf(cardIdx)
+    if (orderIdx === -1) return { selected: false, orderIdx: -1, isFlipped: false }
+    const isFlipped = orderIdx < revealStep
+    return { selected: true, orderIdx, isFlipped }
+  }
+
+  const selPrompt = SELECTION_PROMPTS[selectedOrder.length] ?? SELECTION_PROMPTS[0]
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '1.25rem',
+        padding: '1rem 1.5rem',
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{ textAlign: 'center' }}
+      >
+        <h2
+          className="font-magic text-gold-shine"
+          style={{ fontSize: '1.8rem', margin: 0 }}
+        >
+          {phase === 'selection'
+            ? `${selPrompt.emoji} Choose your ${selPrompt.tense} card (${selectedOrder.length}/3)`
+            : '✨ Your Tarot Reading'}
+        </h2>
+      </motion.div>
+
+      {/* ── Phase: selection ── */}
+      {phase === 'selection' && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '1rem',
+          }}
+        >
+          {Array.from({ length: TOTAL_CARDS }, (_, idx) => {
+            const { selected, orderIdx } = getCardState(idx)
+            return (
+              <CardBack
+                key={idx}
+                selected={selected}
+                orderIdx={orderIdx}
+                cardIdx={idx}
+                onClick={() => handleCardClick(idx)}
+              />
+            )
+          })}
+        </motion.div>
+      )}
+
+      {/* ── Phase: revealing / complete ── */}
+      {(phase === 'revealing' || phase === 'complete') && (
+        <>
+          <TarotTimeline revealStep={revealStep} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              display: 'flex',
+              gap: 'clamp(0.75rem, 2vw, 1.5rem)',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              flexWrap: 'wrap',
+            }}
+          >
+            {selectedOrder.map((cardIdx, orderIdx) => {
+              const tense     = tenseForOrder(orderIdx)
+              const data      = content?.[tense]
+              const isFlipped = orderIdx < revealStep
+
+              return (
+                <TarotRevealCard
+                  key={cardIdx}
+                  tense={tense}
+                  data={data}
+                  isFlipped={isFlipped}
+                  delay={orderIdx * 0.2}
+                  onAudioEnded={() => handleAudioEnded(orderIdx)}
+                  cardIdx={cardIdx}
+                />
+              )
+            })}
+          </motion.div>
+        </>
+      )}
+
+      {/* Try Again — always rendered to reserve height */}
+      <div style={{ visibility: phase === 'complete' ? 'visible' : 'hidden' }}>
+        <MagicButton onClick={onTryAgain} variant="secondary" size="md">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <RotateCcw size={16} /> Try Again
+          </span>
+        </MagicButton>
+      </div>
+    </div>
+  )
+}
+
+// ── Parse **word** markers → colored + glowing <span> ────────────────────────
+
+function parseHighlightedText(text, color) {
+  if (!text) return null
+  return text.split(/(\*\*[^*]+\*\*)/).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <span key={i} style={{
+          color,
+          fontWeight: 900,
+          textShadow: `0 0 8px ${color}cc, 0 0 16px ${color}66`,
+        }}>
+          {part.slice(2, -2)}
+        </span>
+      )
+    }
+    return part
+  })
+}
+
+// ── Face-down card in selection phase ────────────────────────────────────────
+
+const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={!selected ? { scale: 1.08, y: -6 } : {}}
+    whileTap={!selected ? { scale: 0.93 } : {}}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    style={{
+      width:  'clamp(120px, 16vw, 200px)',
+      aspectRatio: '1696 / 2528',
+      borderRadius: '14px',
+      border: selected ? '2.5px solid #f5c518' : '1.5px solid #7c3aed',
+      cursor: selected ? 'default' : 'pointer',
+      boxShadow: selected
+        ? '0 0 18px rgba(245,197,24,0.5)'
+        : '0 4px 12px rgba(0,0,0,0.4)',
+      position: 'relative',
+      overflow: 'hidden',
+      flexShrink: 0,
+      padding: 0,
+      background: 'linear-gradient(145deg, #1a0b3d, #2d1b69)',
+    }}
+    aria-label={selected ? `Card selected (${TENSE_BADGE[orderIdx]?.label ?? orderIdx + 1})` : 'Select this card'}
+  >
+    {/* Character image */}
+    <img
+      src={`/images/tarot/card-${cardIdx}.png`}
+      alt={`Card ${cardIdx + 1}`}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        borderRadius: 0,
+        display: 'block',
+      }}
+    />
+
+    {/* Bottom gradient banner — tense label on selected card */}
+    {selected && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '38%',
+          borderRadius: '0 0 12px 12px',
+          background: `linear-gradient(transparent, ${TENSE_BADGE[orderIdx]?.bg ?? '#f5c518'}dd)`,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          paddingBottom: '10px',
+        }}
+      >
+        <span className="font-magic" style={{
+          color: '#1a0b3d',
+          fontSize: 'clamp(0.85rem, 2vw, 1.05rem)',
+          fontWeight: 900,
+          letterSpacing: '0.15em',
+        }}>
+          {TENSE_BADGE[orderIdx]?.label ?? (orderIdx + 1)}
+        </span>
+      </motion.div>
+    )}
+  </motion.button>
+)
+
+// ── Flipping result card ──────────────────────────────────────────────────────
+
+const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx }) => {
+  const colors    = TENSE_COLORS[tense]
+  const text      = data?.text ?? '✨ A magical fortune awaits you!'
+  const cleanText = text.replace(/\*\*/g, '')  // strip markers for TTS
+  const image     = data?.image ?? null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay, type: 'spring', stiffness: 200, damping: 18 }}
+      style={{
+        width:  'clamp(150px, 22vw, 240px)',
+        flexShrink: 0,
+      }}
+    >
+      {/* Card wrapper (provides perspective for 3-D flip) */}
+      <div className="card-wrapper" style={{ width: '100%', aspectRatio: '1696 / 2528' }}>
+        <div
+          className={`card-inner${isFlipped ? ' flipped' : ''}`}
+          style={{ width: '100%', height: '100%', position: 'relative' }}
+        >
+          {/* ── Front face (face-down pattern, shown before flip) ── */}
+          <div
+            className="card-face"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '18px',
+              border: `2px solid ${colors.border}`,
+              overflow: 'hidden',
+              boxShadow: `0 0 20px rgba(0,0,0,0.5)`,
+              background: 'linear-gradient(145deg, #1a0b3d, #2d1b69)',
+            }}
+          >
+            <img
+              src={`/images/tarot/card-${cardIdx}.png`}
+              alt="Tarot card"
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            />
+          </div>
+
+          {/* ── Back face (revealed content, shown after flip) ── */}
+          <div
+            className="card-back-face"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '18px',
+              border: `2.5px solid ${colors.border}`,
+              background: 'linear-gradient(160deg, #1a0b3d 0%, #0d0821 100%)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: `0 0 28px rgba(0,0,0,0.6), 0 0 14px ${colors.border}44`,
+            }}
+          >
+            {/* Image area */}
+            <div
+              style={{
+                flex: '0 0 55%',
+                overflow: 'hidden',
+                position: 'relative',
+                background: image
+                  ? 'transparent'
+                  : `linear-gradient(135deg, #3b0764, #1a0b3d)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {image ? (
+                <img
+                  src={image}
+                  alt={text}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <span style={{ fontSize: '3rem' }}>{colors.icon}</span>
+              )}
+
+              {/* Gradient overlay at bottom of image */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '40%',
+                  background: 'linear-gradient(transparent, #0d0821)',
+                }}
+              />
+            </div>
+
+            {/* Text area */}
+            <div
+              style={{
+                flex: 1,
+                padding: '0.6rem 0.8rem 0.75rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                alignItems: 'center',
+              }}
+            >
+              {/* Fortune sentence — wrapper div handles vertical centering; <p> stays block to allow inline text wrapping */}
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', width: '100%' }}>
+                <p
+                  style={{
+                    color: 'white',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: 700,
+                    fontSize: 'clamp(0.7rem, 1.6vw, 0.95rem)',
+                    lineHeight: 1.4,
+                    margin: 0,
+                    textAlign: 'center',
+                    width: '100%',
+                  }}
+                >
+                  {parseHighlightedText(text, colors.label)}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Listen button area — always rendered to reserve height, hidden until flipped */}
+      <div
+        style={{
+          marginTop: '0.5rem',
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: '44px',
+          visibility: isFlipped ? 'visible' : 'hidden',
+        }}
+      >
+        {isFlipped && (
+          <TTSPlayer text={cleanText} autoPlay size="sm" onEnded={onAudioEnded} />
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Timeline bar: Past · Present · Future progress ────────────────────────────
+
+const TarotTimeline = ({ revealStep }) => {
+  const items = []
+  TENSES.forEach((tense, i) => {
+    const isRevealed = i < revealStep
+    const isCurrent  = i === revealStep - 1  // card being revealed right now
+    const colors = TENSE_COLORS[tense]
+    const TenseIcon = TENSE_ICONS[tense]
+
+    if (i > 0) {
+      items.push(
+        <div key={`line-${i}`} style={{
+          flex: 1,
+          height: '2px',
+          marginTop: '21px', // aligns with centre of active circle (42px / 2 − 1)
+          alignSelf: 'flex-start',
+          background: (isRevealed || isCurrent) ? colors.border : 'rgba(255,255,255,0.12)',
+          transition: 'background 0.5s',
+        }} />
+      )
+    }
+
+    items.push(
+      <motion.div
+        key={tense}
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.15 }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+      >
+        <motion.div
+          animate={isCurrent ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+          transition={isCurrent ? { duration: 0.6, repeat: 2, ease: 'easeInOut' } : {}}
+          style={{
+            width:  isCurrent ? '42px' : '36px',
+            height: isCurrent ? '42px' : '36px',
+            borderRadius: '50%',
+            border: `2px solid ${(isRevealed || isCurrent) ? colors.border : 'rgba(255,255,255,0.2)'}`,
+            background: isCurrent
+              ? `${colors.border}55`
+              : isRevealed ? `${colors.border}33` : 'transparent',
+            boxShadow: isCurrent ? `0 0 14px ${colors.border}99` : 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: (isRevealed || isCurrent) ? colors.label : 'rgba(255,255,255,0.25)',
+            transition: 'all 0.4s',
+          }}
+        >
+          <TenseIcon size={isCurrent ? 18 : 15} />
+        </motion.div>
+        <span style={{
+          fontSize: isCurrent ? '0.65rem' : '0.6rem',
+          fontFamily: 'Nunito, sans-serif', fontWeight: 800,
+          letterSpacing: '0.1em',
+          color: (isRevealed || isCurrent) ? colors.label : 'rgba(255,255,255,0.25)',
+          transition: 'all 0.4s',
+        }}>
+          {tense.toUpperCase()}
+        </span>
+      </motion.div>
+    )
+  })
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      width: '100%',
+      maxWidth: '720px',
+      padding: '0 2rem',
+    }}>
+      {items}
+    </div>
+  )
+}
+
+export default TarotActivityPage

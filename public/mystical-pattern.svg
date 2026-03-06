@@ -1,0 +1,119 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Repeating pattern of mystical elements -->
+  <!-- Row 1 -->
+  <g opacity="0.15">
+    <!-- Stars -->
+    <path d="M 64 64 L 66 70 L 72 70 L 67 74 L 69 80 L 64 76 L 59 80 L 61 74 L 56 70 L 62 70 Z"
+          fill="#c4b5fd"/>
+    <path d="M 320 64 L 322 70 L 328 70 L 323 74 L 325 80 L 320 76 L 315 80 L 317 74 L 312 70 L 318 70 Z"
+          fill="#c4b5fd"/>
+
+    <!-- Moons -->
+    <path d="M 192 64 Q 187 54, 192 44 Q 202 49, 192 64 Z" fill="#a78bfa"/>
+    <path d="M 448 64 Q 443 54, 448 44 Q 458 49, 448 64 Z" fill="#a78bfa"/>
+
+    <!-- Small circles (planets) -->
+    <circle cx="128" cy="64" r="3" fill="#7c3aed" opacity="0.3"/>
+    <circle cx="384" cy="64" r="3" fill="#7c3aed" opacity="0.3"/>
+  </g>
+
+  <!-- Row 2 -->
+  <g opacity="0.12">
+    <!-- Mystical symbols -->
+    <circle cx="64" cy="192" r="8" fill="none" stroke="#c4b5fd" stroke-width="1"/>
+    <circle cx="64" cy="192" r="4" fill="#a78bfa"/>
+
+    <circle cx="320" cy="192" r="8" fill="none" stroke="#c4b5fd" stroke-width="1"/>
+    <circle cx="320" cy="192" r="4" fill="#a78bfa"/>
+
+    <!-- Diamonds -->
+    <path d="M 192 192 L 196 196 L 192 200 L 188 196 Z" fill="#c4b5fd"/>
+    <path d="M 448 192 L 452 196 L 448 200 L 444 196 Z" fill="#c4b5fd"/>
+
+    <!-- Dots -->
+    <circle cx="128" cy="192" r="2" fill="#7c3aed"/>
+    <circle cx="256" cy="192" r="2" fill="#7c3aed"/>
+    <circle cx="384" cy="192" r="2" fill="#7c3aed"/>
+  </g>
+
+  <!-- Row 3 (center) -->
+  <g opacity="0.1">
+    <!-- Stars -->
+    <path d="M 64 320 L 66 326 L 72 326 L 67 330 L 69 336 L 64 332 L 59 336 L 61 330 L 56 326 L 62 326 Z"
+          fill="#c4b5fd"/>
+    <path d="M 320 320 L 322 326 L 328 326 L 323 330 L 325 336 L 320 332 L 315 336 L 317 330 L 312 326 L 318 326 Z"
+          fill="#c4b5fd"/>
+
+    <!-- Moons -->
+    <path d="M 192 320 Q 187 310, 192 300 Q 202 305, 192 320 Z" fill="#a78bfa"/>
+    <path d="M 448 320 Q 443 310, 448 300 Q 458 305, 448 320 Z" fill="#a78bfa"/>
+
+    <!-- Constellation lines -->
+    <line x1="120" y1="320" x2="136" y2="320" stroke="#7c3aed" stroke-width="0.5" opacity="0.5"/>
+    <circle cx="120" cy="320" r="1.5" fill="#c4b5fd"/>
+    <circle cx="136" cy="320" r="1.5" fill="#c4b5fd"/>
+
+    <line x1="376" y1="320" x2="392" y2="320" stroke="#7c3aed" stroke-width="0.5" opacity="0.5"/>
+    <circle cx="376" cy="320" r="1.5" fill="#c4b5fd"/>
+    <circle cx="392" cy="320" r="1.5" fill="#c4b5fd"/>
+  </g>
+
+  <!-- Row 4 -->
+  <g opacity="0.12">
+    <!-- Mystical symbols -->
+    <circle cx="64" cy="448" r="8" fill="none" stroke="#c4b5fd" stroke-width="1"/>
+    <circle cx="64" cy="448" r="4" fill="#a78bfa"/>
+
+    <circle cx="320" cy="448" r="8" fill="none" stroke="#c4b5fd" stroke-width="1"/>
+    <circle cx="320" cy="448" r="4" fill="#a78bfa"/>
+
+    <!-- Diamonds -->
+    <path d="M 192 448 L 196 452 L 192 456 L 188 452 Z" fill="#c4b5fd"/>
+    <path d="M 448 448 L 452 452 L 448 456 L 444 452 Z" fill="#c4b5fd"/>
+
+    <!-- Plus signs -->
+    <path d="M 256 446 L 256 450 M 254 448 L 258 448" stroke="#7c3aed" stroke-width="1"/>
+  </g>
+
+  <!-- Additional scattered elements for variety -->
+  <g opacity="0.08">
+    <!-- Tiny stars scattered -->
+    <circle cx="100" cy="100" r="1" fill="#fde68a"/>
+    <circle cx="412" cy="100" r="1" fill="#fde68a"/>
+    <circle cx="228" cy="228" r="1" fill="#fde68a"/>
+    <circle cx="284" cy="284" r="1" fill="#fde68a"/>
+    <circle cx="156" cy="356" r="1" fill="#fde68a"/>
+    <circle cx="356" cy="156" r="1" fill="#fde68a"/>
+
+    <!-- Mystical crosses -->
+    <path d="M 160 140 L 160 148 M 156 144 L 164 144" stroke="#a78bfa" stroke-width="0.8"/>
+    <path d="M 352 396 L 352 404 M 348 400 L 356 400" stroke="#a78bfa" stroke-width="0.8"/>
+  </g>
+
+  <!-- Edge elements for seamless tiling -->
+  <g opacity="0.15">
+    <!-- Top edge -->
+    <path d="M 0 64 L 2 70 L 8 70 L 3 74 L 5 80 L 0 76 L -5 80 L -3 74 L -8 70 L -2 70 Z"
+          fill="#c4b5fd"/>
+    <path d="M 512 64 L 514 70 L 520 70 L 515 74 L 517 80 L 512 76 L 507 80 L 509 74 L 504 70 L 510 70 Z"
+          fill="#c4b5fd"/>
+
+    <!-- Bottom edge -->
+    <path d="M 0 448 L 2 454 L 8 454 L 3 458 L 5 464 L 0 460 L -5 464 L -3 458 L -8 454 L -2 454 Z"
+          fill="#c4b5fd"/>
+    <path d="M 512 448 L 514 454 L 520 454 L 515 458 L 517 464 L 512 460 L 507 464 L 509 458 L 504 454 L 510 454 Z"
+          fill="#c4b5fd"/>
+
+    <!-- Left edge -->
+    <circle cx="0" cy="256" r="3" fill="#7c3aed" opacity="0.3"/>
+    <!-- Right edge -->
+    <circle cx="512" cy="256" r="3" fill="#7c3aed" opacity="0.3"/>
+  </g>
+</svg>

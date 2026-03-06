@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  /* 뷰포트 배경색 (스케일드 컨테이너 바깥 여백) */
+  background: #0d0821;
+}
+
+/* React 마운트 루트 — 스케일링 컨테이너(#app)의 기준 좌표계 제공 */
+#root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── 스케일링 컨테이너 초기 스타일 ──────────────────────────────────────────
+   initScaling()이 left / top / transform을 덮어씁니다.
+   여기서는 레이아웃 플래시를 최소화하기 위한 초기값만 정의합니다.    */
+#app {
+  width: 1280px;
+  height: 800px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  /* JS가 적용 전 임시 중앙 정렬 */
+  transform-origin: top left;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, #2d1b69 0%, #0d0821 60%);
+}
+
+/* ── Keyframe Animations ── */
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.5);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px #7c3aed, 0 0 40px rgba(124, 58, 237, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 50px #a78bfa, 0 0 100px rgba(167, 139, 250, 0.6);
+  }
+}
+
+@keyframes shimmer {
+
+  0%,
+  15% {
+    background-position: -200% center;
+  }
+
+  85%,
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes crack-shake {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  20% {
+    transform: rotate(-8deg) scale(1.1);
+  }
+
+  40% {
+    transform: rotate(8deg) scale(1.15);
+  }
+
+  60% {
+    transform: rotate(-5deg) scale(1.05);
+  }
+
+  80% {
+    transform: rotate(5deg) scale(0.9);
+  }
+
+  100% {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ── Utility Classes ── */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.font-magic {
+  font-family: 'Cinzel', serif;
+}
+
+.text-gold-shine {
+  background: linear-gradient(90deg, #f59e0b, #f5c518, #fffde7, #f5c518, #f59e0b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 5s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out forwards;
+}
+
+/* ── Card Flip Styles ── */
+.card-wrapper {
+  perspective: 1200px;
+}
+
+.card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-back-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+
+/* ── Portrait Mode Warning ── */
+@media screen and (orientation: portrait) {
+  #portrait-warning {
+    display: flex !important;
+  }
+
+  #app {
+    display: none !important;
+  }
+}
+
+/* ── Scrollbar Hide ── */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Lucide icon spin (TTSPlayer loading state) ── */
+@keyframes spin-icon {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin-icon 1s linear infinite;
+}

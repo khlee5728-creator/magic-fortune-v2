@@ -1,0 +1,234 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Dark gray-blue gradient for Noir cat (realistic fur color) -->
+    <radialGradient id="noirFur" cx="40%" cy="40%">
+      <stop offset="0%" style="stop-color:#50596d;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#3f4a5c;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#2c3544;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1f2e;stop-opacity:1" />
+    </radialGradient>
+
+    <!-- Darker shadow gradient -->
+    <radialGradient id="noirShadow" cx="60%" cy="60%">
+      <stop offset="0%" style="stop-color:#2c3544;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#1a1f2e;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#0f1419;stop-opacity:0.9" />
+    </radialGradient>
+
+    <!-- Subtle blue-gray highlight -->
+    <radialGradient id="noirHighlight" cx="30%" cy="30%">
+      <stop offset="0%" style="stop-color:#778aa3;stop-opacity:0.6" />
+      <stop offset="50%" style="stop-color:#50596d;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#3f4a5c;stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Dark glow -->
+    <radialGradient id="noirGlow">
+      <stop offset="0%" style="stop-color:#3f4a5c;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:#2c3544;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#1a1f2e;stop-opacity:0" />
+    </radialGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer subtle glow -->
+  <circle cx="50" cy="50" r="40" fill="url(#noirGlow)" opacity="0.4"/>
+
+  <!-- Cat face circle with realistic dark fur -->
+  <circle cx="50" cy="50" r="28" fill="url(#noirFur)"
+          stroke="#1a1f2e" stroke-width="2" filter="url(#glow)"/>
+
+  <!-- Shadow layer for depth -->
+  <circle cx="50" cy="50" r="28" fill="url(#noirShadow)" opacity="0.6"/>
+
+  <!-- Subtle highlight (fur reflection) -->
+  <ellipse cx="42" cy="42" rx="10" ry="12" fill="url(#noirHighlight)" opacity="0.5"/>
+
+  <!-- Subtle fur texture (fine details) -->
+  <g opacity="0.15">
+    <circle cx="42" cy="48" r="0.5" fill="#778aa3"/>
+    <circle cx="58" cy="48" r="0.5" fill="#778aa3"/>
+    <circle cx="45" cy="56" r="0.5" fill="#778aa3"/>
+    <circle cx="55" cy="56" r="0.5" fill="#778aa3"/>
+    <circle cx="50" cy="62" r="0.5" fill="#778aa3"/>
+    <circle cx="38" cy="58" r="0.5" fill="#778aa3"/>
+    <circle cx="62" cy="58" r="0.5" fill="#778aa3"/>
+  </g>
+
+  <!-- Left ear (pointed, like real Noir) -->
+  <path d="M 32 32 L 25 15 L 40 28 Z"
+        fill="url(#noirFur)" stroke="#1a1f2e" stroke-width="2"/>
+  <!-- Inner ear with pink/dark detail -->
+  <path d="M 30 28 L 27 18 L 35 26 Z"
+        fill="#4a3a4f" opacity="0.6"/>
+  <path d="M 31 26 L 28.5 20 L 34 24 Z"
+        fill="#342838" opacity="0.5"/>
+
+  <!-- Right ear (pointed, like real Noir) -->
+  <path d="M 68 32 L 75 15 L 60 28 Z"
+        fill="url(#noirFur)" stroke="#1a1f2e" stroke-width="2"/>
+  <!-- Inner ear with pink/dark detail -->
+  <path d="M 70 28 L 73 18 L 65 26 Z"
+        fill="#4a3a4f" opacity="0.6"/>
+  <path d="M 69 26 L 71.5 20 L 66 24 Z"
+        fill="#342838" opacity="0.5"/>
+
+  <!-- Open eyes (like Noir's curious expression) -->
+  <g>
+    <!-- Left eye -->
+    <ellipse cx="38" cy="45" rx="5.5" ry="7" fill="#d0f0e8" opacity="0.95"/>
+
+    <!-- Left pupil (dark teal green) -->
+    <circle cx="38" cy="45" r="4" fill="#2a5850"/>
+    <circle cx="38" cy="45" r="3" fill="#1e4540"/>
+
+    <!-- Left eye highlight (sparkle) -->
+    <ellipse cx="36" cy="43" rx="2" ry="2.5" fill="#ffffff" opacity="0.9"/>
+    <circle cx="35.5" cy="42" r="1" fill="#ffffff"/>
+
+    <!-- Left eye bottom reflection -->
+    <ellipse cx="38" cy="48" rx="1.5" ry="1" fill="#a8e6d7" opacity="0.5"/>
+
+    <!-- Right eye -->
+    <ellipse cx="62" cy="45" rx="5.5" ry="7" fill="#d0f0e8" opacity="0.95"/>
+
+    <!-- Right pupil (dark teal green) -->
+    <circle cx="62" cy="45" r="4" fill="#2a5850"/>
+    <circle cx="62" cy="45" r="3" fill="#1e4540"/>
+
+    <!-- Right eye highlight (sparkle) -->
+    <ellipse cx="60" cy="43" rx="2" ry="2.5" fill="#ffffff" opacity="0.9"/>
+    <circle cx="59.5" cy="42" r="1" fill="#ffffff"/>
+
+    <!-- Right eye bottom reflection -->
+    <ellipse cx="62" cy="48" rx="1.5" ry="1" fill="#a8e6d7" opacity="0.5"/>
+
+    <!-- Eye sparkle animation -->
+    <circle cx="40" cy="43" r="0.8" fill="#a8e6d7">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="64" cy="43" r="0.8" fill="#a8e6d7">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Natural blinking animation -->
+  <g>
+    <!-- Left eyelid (blinks) -->
+    <ellipse cx="38" cy="45" rx="5.5" ry="0" fill="url(#noirFur)" opacity="0">
+      <animate attributeName="ry"
+               values="0;0;0;7.5;0;0;0"
+               dur="6s"
+               repeatCount="indefinite"/>
+      <animate attributeName="opacity"
+               values="0;0;0;0.95;0;0;0"
+               dur="6s"
+               repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Right eyelid (blinks) -->
+    <ellipse cx="62" cy="45" rx="5.5" ry="0" fill="url(#noirFur)" opacity="0">
+      <animate attributeName="ry"
+               values="0;0;0;7.5;0;0;0"
+               dur="6s"
+               repeatCount="indefinite"/>
+      <animate attributeName="opacity"
+               values="0;0;0;0.95;0;0;0"
+               dur="6s"
+               repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- Nose (small pink-gray triangle) -->
+  <path d="M 50 52 L 47 56 L 53 56 Z"
+        fill="#6b5168"/>
+  <path d="M 50 52 L 48 55 L 52 55 Z"
+        fill="#8f7489" opacity="0.6"/>
+  <circle cx="49" cy="54" r="0.5" fill="#a08a9e" opacity="0.5"/>
+
+  <!-- Mouth (gentle, calm smile - peaceful expression) -->
+  <path d="M 50 56 L 50 58"
+        stroke="#2c3544" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 50 58 Q 45 60 43 59"
+        stroke="#2c3544" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M 50 58 Q 55 60 57 59"
+        stroke="#2c3544" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+  <!-- Whiskers (subtle, dark gray-blue) -->
+  <defs>
+    <linearGradient id="whiskerGradientL" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#50596d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3f4a5c;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#2c3544;stop-opacity:0.2" />
+    </linearGradient>
+    <linearGradient id="whiskerGradientR" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#50596d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3f4a5c;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#2c3544;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+  <g stroke-width="1.5" stroke-linecap="round" opacity="0.8">
+    <!-- Left whiskers -->
+    <line x1="28" y1="48" x2="15" y2="45" stroke="url(#whiskerGradientL)"/>
+    <line x1="28" y1="52" x2="15" y2="52" stroke="url(#whiskerGradientL)"/>
+    <line x1="28" y1="56" x2="15" y2="59" stroke="url(#whiskerGradientL)"/>
+
+    <!-- Right whiskers -->
+    <line x1="72" y1="48" x2="85" y2="45" stroke="url(#whiskerGradientR)"/>
+    <line x1="72" y1="52" x2="85" y2="52" stroke="url(#whiskerGradientR)"/>
+    <line x1="72" y1="56" x2="85" y2="59" stroke="url(#whiskerGradientR)"/>
+  </g>
+
+  <!-- Subtle cheek blush (very minimal, peaceful) -->
+  <ellipse cx="30" cy="52" rx="3" ry="2" fill="#8f7489" opacity="0.2"/>
+  <ellipse cx="70" cy="52" rx="3" ry="2" fill="#8f7489" opacity="0.2"/>
+
+  <!-- Golden sparkles (matching bell/collar theme) -->
+  <circle cx="20" cy="40" r="1.5" fill="#fbbf24">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="80" cy="42" r="1.2" fill="#fde68a">
+    <animate attributeName="opacity" values="1;0.3;1" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="50" cy="20" r="1.3" fill="#fbbf24">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="25" cy="65" r="1" fill="#fde68a">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="75" cy="68" r="1.2" fill="#fbbf24">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Small golden bell icon (reference to Noir's collar) -->
+  <g opacity="0.7">
+    <circle cx="85" cy="60" r="3" fill="#fbbf24">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <ellipse cx="85" cy="61" rx="1.5" ry="0.5" fill="#d97706" opacity="0.6"/>
+  </g>
+
+  <!-- Peaceful mood indicator (ZZZ or musical note for calm) -->
+  <g opacity="0.6">
+    <text x="80" y="30" fill="#60a5fa" font-size="8" font-family="Arial, sans-serif" font-weight="bold">
+      ♪
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+    </text>
+  </g>
+
+  <!-- Optional: Very subtle breathing animation (peaceful sleep) -->
+  <animateTransform
+    attributeName="transform"
+    type="scale"
+    values="1 1; 1.01 1.01; 1 1"
+    dur="4s"
+    additive="sum"
+    repeatCount="indefinite"/>
+</svg>
