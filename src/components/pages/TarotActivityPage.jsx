@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { RotateCcw, Scroll, Star, Eye } from 'lucide-react'
 import TTSPlayer from '../common/TTSPlayer'
@@ -15,9 +15,9 @@ const TENSE_ICONS = { past: Scroll, present: Star, future: Eye }
 
 // Drives the dynamic header during card selection
 const SELECTION_PROMPTS = [
-  { emoji: '🃏', tense: 'PAST',    sub: 'The cards will reveal your Past · Present · Future!' },
-  { emoji: '⭐', tense: 'PRESENT', sub: 'Your PAST card is chosen! ✨' },
-  { emoji: '🔮', tense: 'FUTURE',  sub: 'Your PRESENT card is chosen! ✨' },
+  { tense: 'PAST',    sub: 'The cards will reveal your Past · Present · Future!' },
+  { tense: 'PRESENT', sub: 'Your PAST card is chosen! ✨' },
+  { tense: 'FUTURE',  sub: 'Your PRESENT card is chosen! ✨' },
 ]
 
 // Pill badge: tense colour + name instead of a plain number
@@ -108,11 +108,11 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
       >
         <h2
           className="font-magic text-gold-shine"
-          style={{ fontSize: '1.8rem', margin: 0 }}
+          style={{ fontSize: '1.8rem', margin: 0, fontWeight: 700 }}
         >
           {phase === 'selection'
-            ? `${selPrompt.emoji} Choose your ${selPrompt.tense} card (${selectedOrder.length}/3)`
-            : '✨ Your Tarot Reading'}
+            ? `Choose your ${selPrompt.tense} card (${selectedOrder.length}/3)`
+            : 'Your Tarot Reading'}
         </h2>
       </motion.div>
 
@@ -287,10 +287,14 @@ const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
 // ── Flipping result card ──────────────────────────────────────────────────────
 
 const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx }) => {
+  const [imageLoaded, setImageLoaded] = useState(false)
   const colors    = TENSE_COLORS[tense]
   const text      = data?.text ?? '✨ A magical fortune awaits you!'
   const cleanText = text.replace(/\*\*/g, '')  // strip markers for TTS
   const image     = data?.image ?? null
+
+  // Reset loaded state when image URL changes
+  useEffect(() => { setImageLoaded(false) }, [image])
 
   return (
     <motion.div
@@ -361,10 +365,22 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                 <img
                   src={image}
                   alt={text}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  onLoad={() => setImageLoaded(true)}
+                  style={{
+                    width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                    opacity: imageLoaded ? 1 : 0,
+                    transition: 'opacity 0.5s ease-in',
+                  }}
                 />
-              ) : (
-                <span style={{ fontSize: '3rem' }}>{colors.icon}</span>
+              ) : null}
+              {/* Placeholder icon — visible until image loads */}
+              {(!image || !imageLoaded) && (
+                <span style={{
+                  fontSize: '3rem',
+                  position: image ? 'absolute' : 'static',
+                  top: '50%', left: '50%',
+                  transform: image ? 'translate(-50%, -50%)' : 'none',
+                }}>{colors.icon}</span>
               )}
 
               {/* Gradient overlay at bottom of image */}

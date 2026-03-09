@@ -7,6 +7,52 @@ import CharacterVideo from '../common/CharacterVideo'
 
 const COOKIE_COUNT = 5
 
+// Modal verb configuration for each cookie
+const MODAL_VERBS = ['will', 'can', 'should', 'might', 'must']
+
+const MODAL_CONFIG = {
+  will: {
+    label: 'WILL',
+    color: '#3b82f6',
+    lightColor: '#dbeafe',
+    description: 'Future Certainty',
+    tip: '**WILL** expresses certainty about the future. Use it when you\'re sure something will happen!',
+    icon: '🔮'
+  },
+  can: {
+    label: 'CAN',
+    color: '#10b981',
+    lightColor: '#d1fae5',
+    description: 'Ability & Possibility',
+    tip: '**CAN** shows ability or possibility. Use it to talk about what you\'re able to do!',
+    icon: '💪'
+  },
+  should: {
+    label: 'SHOULD',
+    color: '#f59e0b',
+    lightColor: '#fef3c7',
+    description: 'Advice & Recommendation',
+    tip: '**SHOULD** gives advice or recommendations. Use it to suggest what\'s best to do!',
+    icon: '💡'
+  },
+  might: {
+    label: 'MIGHT',
+    color: '#8b5cf6',
+    lightColor: '#ede9fe',
+    description: 'Weak Possibility',
+    tip: '**MIGHT** expresses a weak possibility. Use it when something could happen, but you\'re not sure!',
+    icon: '🤔'
+  },
+  must: {
+    label: 'MUST',
+    color: '#ef4444',
+    lightColor: '#fee2e2',
+    description: 'Strong Necessity',
+    tip: '**MUST** shows strong necessity or obligation. Use it for things that are very important!',
+    icon: '⚡'
+  }
+}
+
 // ── Floating Character ────────────────────────────────────────────────────────
 
 const FLOAT_POSITIONS = [
@@ -68,6 +114,32 @@ const FloatingCharacter = ({ revealed }) => {
   )
 }
 
+// ── Helper Functions ──────────────────────────────────────────────────────────
+
+/**
+ * Parse text and highlight modal verbs with bold styling
+ * Looks for **word** markers and applies color highlighting
+ */
+function parseModalText(text, modalConfig) {
+  if (!text) return null
+  const parts = text.split(/(\*\*[^*]+\*\*)/)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const word = part.slice(2, -2)
+      return (
+        <span key={i} style={{
+          fontWeight: 900,
+          color: modalConfig?.color || '#2d1500',
+          textShadow: modalConfig ? `0 0 8px ${modalConfig.color}44` : 'none'
+        }}>
+          {word}
+        </span>
+      )
+    }
+    return part
+  })
+}
+
 // ── Fortune Activity Page ─────────────────────────────────────────────────────
 
 /**
@@ -80,18 +152,35 @@ const FloatingCharacter = ({ revealed }) => {
  *  2. User clicks a cookie → crack animation plays.
  *  3. Fortune message appears at center; character settles to the left.
  *  4. "Try Again" button navigates back to intro.
+ *
+ * Modal Verbs Learning:
+ *  - Each of 5 cookies represents a different modal verb (will/can/should/might/must)
+ *  - Color-coded labels help students distinguish between modal verbs
+ *  - Grammar tips explain usage of each modal verb
  */
 const FortuneActivityPage = ({ content, onTryAgain }) => {
   const [cookieStates, setCookieStates] = useState(Array(COOKIE_COUNT).fill('idle'))
   const [revealed, setRevealed] = useState(false)
+  const [selectedModalIdx, setSelectedModalIdx] = useState(null)
 
   const handleCookieClick = (idx) => {
     if (revealed || cookieStates.some((s) => s !== 'idle')) return
+    setSelectedModalIdx(idx)
     setCookieStates(cookieStates.map((_, i) => (i === idx ? 'selected' : 'fading')))
     setTimeout(() => setRevealed(true), 750)
   }
 
-  const fortuneText = content?.text ?? '✨ Your magic fortune is on its way!'
+  // Get modal verb data based on selected cookie
+  const selectedModal = selectedModalIdx !== null ? MODAL_VERBS[selectedModalIdx] : null
+  const modalConfig = selectedModal ? MODAL_CONFIG[selectedModal] : null
+
+  // Get fortune data for the selected modal verb
+  const fortuneData = selectedModal && content?.fortune?.[selectedModal]
+    ? content.fortune[selectedModal]
+    : { text: 'Your magic fortune is on its way!', tip: '' }
+
+  const fortuneText = fortuneData.text ?? 'Your magic fortune is on its way!'
+  const fortuneTip = fortuneData.tip ?? modalConfig?.tip ?? ''
 
   return (
     <div
@@ -129,13 +218,15 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
         >
           <h2
             className="font-magic text-gold-shine"
-            style={{ fontSize: '1.8rem', margin: 0 }}
+            style={{ fontSize: '1.8rem', margin: 0, fontWeight: 700 }}
           >
-            {revealed ? '🌟 Your Fortune!' : '🥠 Choose Your Lucky Cookie!'}
+            {revealed
+              ? `Your ${modalConfig?.label || ''} Fortune!`
+              : 'Choose Your Modal Verb Cookie!'}
           </h2>
           {!revealed && (
-            <p style={{ color: '#c4b5fd', fontSize: '0.9rem', margin: '0.4rem 0 0', fontFamily: 'Nunito, sans-serif' }}>
-              Tap a cookie to reveal your magic English message ✨
+            <p style={{ color: '#c4b5fd', fontSize: '0.9rem', margin: '0.4rem 0 0', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}>
+              Each cookie teaches a different modal verb!
             </p>
           )}
         </motion.div>
@@ -155,13 +246,19 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                 flex: 1,
               }}
             >
-              {Array.from({ length: COOKIE_COUNT }, (_, idx) => (
-                <CookieSlot
-                  key={idx}
-                  state={cookieStates[idx]}
-                  onClick={() => handleCookieClick(idx)}
-                />
-              ))}
+              {Array.from({ length: COOKIE_COUNT }, (_, idx) => {
+                const modalVerb = MODAL_VERBS[idx]
+                const config = MODAL_CONFIG[modalVerb]
+                return (
+                  <CookieSlot
+                    key={idx}
+                    state={cookieStates[idx]}
+                    onClick={() => handleCookieClick(idx)}
+                    modalType={modalVerb}
+                    modalConfig={config}
+                  />
+                )
+              })}
             </motion.div>
           ) : (
             <motion.div
@@ -195,7 +292,49 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                 background: 'linear-gradient(90deg, transparent, #c0392b 20%, #c0392b 80%, transparent)',
                 opacity: 0.7,
               }} />
-              <div style={{ fontSize: '1.4rem', marginBottom: '0.6rem', marginTop: '0.25rem', opacity: 0.85 }}>✦</div>
+
+              {/* Modal Badge */}
+              {modalConfig && (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '16px',
+                    background: `linear-gradient(135deg, ${modalConfig.color}15, ${modalConfig.color}08)`,
+                    border: `2px solid ${modalConfig.color}`,
+                    marginBottom: '0.75rem',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  <span style={{ fontSize: '1.3rem' }}>{modalConfig.icon}</span>
+                  <span style={{
+                    color: modalConfig.color,
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: 900,
+                    fontSize: '1rem',
+                    letterSpacing: '0.05em',
+                    textShadow: `0 0 12px ${modalConfig.color}33`,
+                  }}>
+                    {modalConfig.label}
+                  </span>
+                  <span style={{
+                    color: '#7d5a3a',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    opacity: 0.7,
+                  }}>
+                    {modalConfig.description}
+                  </span>
+                </motion.div>
+              )}
+
+              <div style={{ fontSize: '1.4rem', marginBottom: '0.6rem', marginTop: '0rem', opacity: 0.85 }}>✦</div>
               <p style={{
                 color: '#2d1500',
                 fontFamily: 'Cinzel, serif',
@@ -205,8 +344,52 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                 margin: '0',
                 letterSpacing: '0.03em',
               }}>
-                "{fortuneText}"
+                "{parseModalText(fortuneText, modalConfig)}"
               </p>
+
+              {/* Grammar Tip Section */}
+              {fortuneTip && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  style={{
+                    marginTop: '1.25rem',
+                    padding: '0.85rem 1.25rem',
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${modalConfig?.lightColor || '#fef3c7'}44, ${modalConfig?.lightColor || '#fef3c7'}22)`,
+                    border: `1.5px solid ${modalConfig?.color || '#f59e0b'}33`,
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.4rem',
+                  }}>
+                    <span style={{ fontSize: '1.1rem' }}>💡</span>
+                    <span style={{
+                      color: '#7d5a3a',
+                      fontFamily: 'Nunito, sans-serif',
+                      fontWeight: 800,
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.03em',
+                    }}>
+                      Grammar Tip
+                    </span>
+                  </div>
+                  <p style={{
+                    color: '#5a3e2b',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    lineHeight: 1.6,
+                    margin: '0',
+                  }}>
+                    {parseModalText(fortuneTip, modalConfig)}
+                  </p>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -252,7 +435,7 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
 
 // ── Cookie Slot ───────────────────────────────────────────────────────────────
 
-const CookieSlot = ({ state, onClick }) => {
+const CookieSlot = ({ state, onClick, modalType, modalConfig }) => {
   const isIdle     = state === 'idle'
   const isSelected = state === 'selected'
   const isFading   = state === 'fading'
@@ -265,8 +448,39 @@ const CookieSlot = ({ state, onClick }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: '0.5rem',
       }}
     >
+      {/* Modal Label - shows modal verb name with color */}
+      {modalConfig && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: isIdle ? 1 : isFading ? 0 : 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.35rem 0.75rem',
+            borderRadius: '12px',
+            background: `linear-gradient(135deg, ${modalConfig.color}22, ${modalConfig.color}11)`,
+            border: `1.5px solid ${modalConfig.color}55`,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <span style={{ fontSize: '1rem' }}>{modalConfig.icon}</span>
+          <span style={{
+            color: modalConfig.lightColor,
+            fontFamily: 'Nunito, sans-serif',
+            fontWeight: 800,
+            fontSize: '0.85rem',
+            letterSpacing: '0.03em',
+            textShadow: `0 0 8px ${modalConfig.color}66`,
+          }}>
+            {modalConfig.label}
+          </span>
+        </motion.div>
+      )}
       <AnimatePresence mode="wait">
         {/* Cookie (idle or fading) */}
         {(isIdle || isFading) && (
@@ -304,18 +518,6 @@ const CookieSlot = ({ state, onClick }) => {
             >
               🥠
             </span>
-            {isIdle && (
-              <span
-                style={{
-                  color: '#c4b5fd',
-                  fontSize: '0.85rem',
-                  fontFamily: 'Nunito, sans-serif',
-                  fontWeight: 700,
-                }}
-              >
-                Tap me!
-              </span>
-            )}
           </motion.button>
         )}
 

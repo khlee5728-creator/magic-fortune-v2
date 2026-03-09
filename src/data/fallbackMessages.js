@@ -1,29 +1,44 @@
 /**
  * Static fallback content used when the AI API is unavailable.
- * 20 fortune cookie messages + 3 tarot sets.
+ * 5 fortune cookie sets (modal verbs: will/can/should/might/must) + 3 tarot sets.
  */
 
 export const FORTUNE_FALLBACKS = [
-  "Today is a great day to try something new and exciting!",
-  "Your kindness will make a friend smile today.",
-  "A fun surprise is waiting for you — keep your eyes open!",
-  "You will do amazing things when you believe in yourself.",
-  "Good things are coming your way — keep smiling!",
-  "Today, your creativity will shine brighter than ever.",
-  "A wonderful adventure is just around the corner!",
-  "Your hard work will bring you a sweet reward very soon.",
-  "Someone special is thinking about you right now.",
-  "The stars say you will have a fantastic day at school!",
-  "Your ideas are wonderful — share them with the world!",
-  "A little bird told me you will eat something delicious today.",
-  "Today is your lucky day — go for it with all your heart!",
-  "You are braver than you think and smarter than you know.",
-  "Great things happen to people who stay as positive as you.",
-  "Your laughter will brighten up every room you walk into.",
-  "Something magical is about to happen in your life very soon!",
-  "You have a special gift — use it to make others feel happy.",
-  "Today, you will learn something truly amazing and wonderful.",
-  "The universe is cheering for you — you've totally got this!",
+  {
+    will:   { text: "You **will** discover something amazing and wonderful today!" },
+    can:    { text: "You **can** achieve anything when you believe in yourself!" },
+    should: { text: "You **should** share your brilliant ideas with your friends!" },
+    might:  { text: "Something magical **might** happen if you keep smiling!" },
+    must:   { text: "You **must** remember how special and talented you truly are!" },
+  },
+  {
+    will:   { text: "Good things **will** come your way very soon — stay positive!" },
+    can:    { text: "You **can** make someone's day brighter with your kindness!" },
+    should: { text: "You **should** try something new and exciting this week!" },
+    might:  { text: "A wonderful surprise **might** be waiting just around the corner!" },
+    must:   { text: "You **must** never give up on your amazing dreams!" },
+  },
+  {
+    will:   { text: "The stars say you **will** have a fantastic day at school!" },
+    can:    { text: "You **can** do great things when you work hard and stay focused!" },
+    should: { text: "You **should** be proud of all the progress you've made!" },
+    might:  { text: "Your creativity **might** lead you to an incredible discovery!" },
+    must:   { text: "You **must** always believe in your wonderful abilities!" },
+  },
+  {
+    will:   { text: "Your hard work **will** bring you a sweet reward very soon!" },
+    can:    { text: "You **can** turn any challenge into an exciting adventure!" },
+    should: { text: "You **should** celebrate your unique gifts and talents today!" },
+    might:  { text: "A fun adventure **might** begin when you least expect it!" },
+    must:   { text: "You **must** know that you are braver than you think!" },
+  },
+  {
+    will:   { text: "Something wonderful **will** happen when you follow your heart!" },
+    can:    { text: "You **can** light up any room with your amazing smile!" },
+    should: { text: "You **should** trust your instincts — they're usually right!" },
+    might:  { text: "The universe **might** have a special surprise planned for you!" },
+    must:   { text: "You **must** remember that you're capable of incredible things!" },
+  },
 ]
 
 export const TAROT_FALLBACKS = [
@@ -44,8 +59,10 @@ export const TAROT_FALLBACKS = [
   },
 ]
 
-export const getRandomFortune = () =>
-  FORTUNE_FALLBACKS[Math.floor(Math.random() * FORTUNE_FALLBACKS.length)]
+export const getRandomFortune = () => {
+  const randomSet = FORTUNE_FALLBACKS[Math.floor(Math.random() * FORTUNE_FALLBACKS.length)]
+  return { fortune: randomSet }
+}
 
 export const getRandomTarot = () =>
   TAROT_FALLBACKS[Math.floor(Math.random() * TAROT_FALLBACKS.length)]

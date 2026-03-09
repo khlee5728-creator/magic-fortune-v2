@@ -7,7 +7,7 @@ import TarotActivityPage from './components/pages/TarotActivityPage'
 import CharacterPage from './components/pages/CharacterPage'
 import StarField from './components/common/StarField'
 import BGMToggle from './components/common/BGMToggle'
-import { generateFortuneCookieContent, generateTarotContent } from './api/openai'
+import { generateFortuneCookieContent, generateTarotText, generateTarotImages } from './api/openai'
 import { getRandomFortune, getRandomTarot } from './data/fallbackMessages'
 import { saveActivity } from './utils/localStore'
 import { initScaling } from './utils/scaling'
@@ -76,25 +76,56 @@ function App() {
     setMode(selectedMode)
     setAppState('loading')
 
-    let content
-    try {
-      if (selectedMode === 'fortune') {
+    if (selectedMode === 'fortune') {
+      let content
+      try {
         content = await generateFortuneCookieContent()
-      } else {
-        content = await generateTarotContent()
+      } catch (error) {
+        console.error('AI generation failed, using fallback:', error)
+        content = getRandomFortune()
       }
-    } catch (error) {
-      console.error('AI generation failed, using fallback:', error)
-      if (selectedMode === 'fortune') {
-        content = { text: getRandomFortune() }
-      } else {
-        content = getRandomTarot()
+      saveActivity(selectedMode, content)
+      setAiContent(content)
+      setAppState('fortune')
+    } else {
+      // Tarot: 2-phase loading — text first, images in background
+      let messages
+      try {
+        messages = await generateTarotText()
+      } catch (error) {
+        console.error('AI text generation failed, using fallback:', error)
+        const fallback = getRandomTarot()
+        saveActivity('tarot', fallback)
+        setAiContent(fallback)
+        setAppState('tarot')
+        return
       }
-    }
 
-    saveActivity(selectedMode, content)
-    setAiContent(content)
-    setAppState(selectedMode)
+      const textOnlyContent = {
+        past:    { text: messages.past,    image: null, label: 'Past',    tense: 'past' },
+        present: { text: messages.present, image: null, label: 'Present', tense: 'present' },
+        future:  { text: messages.future,  image: null, label: 'Future',  tense: 'future' },
+      }
+      saveActivity('tarot', textOnlyContent)
+      setAiContent(textOnlyContent)
+      setAppState('tarot')
+
+      // Background image generation during card selection phase
+      generateTarotImages(messages).then(({ pastImg, presentImg, futureImg }) => {
+        // Preload into browser cache before updating state
+        ;[pastImg, presentImg, futureImg].filter(Boolean).forEach(url => {
+          const img = new Image()
+          img.src = url
+        })
+        setAiContent(prev => ({
+          past:    { ...prev.past,    image: pastImg },
+          present: { ...prev.present, image: presentImg },
+          future:  { ...prev.future,  image: futureImg },
+        }))
+      }).catch(() => {
+        console.warn('Tarot image generation failed, continuing with text only')
+      })
+    }
   }, [bgm, isBGMEnabled])
 
   const handleTryAgain = useCallback(() => {

@@ -1,10 +1,22 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Users } from 'lucide-react'
 import CharacterVideo from '../common/CharacterVideo'
 import MagicButton from '../common/MagicButton'
 import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
+
+// Preload tarot card images for faster rendering
+const TAROT_CARD_COUNT = 10
+const preloadTarotImages = () => {
+  const images = []
+  for (let i = 0; i < TAROT_CARD_COUNT; i++) {
+    const img = new Image()
+    img.src = `/images/tarot/card-${i}.png`
+    images.push(img)
+  }
+  return images
+}
 
 const container = {
   hidden: {},
@@ -20,6 +32,11 @@ const IntroPage = ({ onStart }) => {
 
   // Sound effects
   const playSelect = useSound('/sounds/card-select.mp3', { volume: 0.5 })
+
+  // Preload tarot card images on mount for faster transition
+  useEffect(() => {
+    preloadTarotImages()
+  }, [])
 
   const handleCardClick = mode => {
     playSelect()
@@ -72,7 +89,7 @@ const IntroPage = ({ onStart }) => {
           transition: 'all 0.2s ease',
         }}
       >
-        <span style={{ fontSize: '1rem' }}>✨</span>
+        <Users size={16} />
         Luna & Noir
       </motion.button>
 
@@ -239,11 +256,13 @@ const IntroPage = ({ onStart }) => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <img
-                  src="/fortune-cookie-icon.svg"
-                  alt="Fortune Cookie"
-                  style={{ width: '100px', height: '90px', filter: 'drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4))' }}
-                />
+                <div style={{
+                  fontSize: '80px',
+                  lineHeight: '80px',
+                  filter: 'drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4))'
+                }}>
+                  🥠
+                </div>
               </div>
               <div style={{ textAlign: 'center', position: 'relative' }}>
                 <div

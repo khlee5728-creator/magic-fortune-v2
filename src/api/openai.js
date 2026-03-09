@@ -73,16 +73,45 @@ export async function callTTS(text, voice = 'nova') {
 // ─── Fortune Cookie ───────────────────────────────────────────────────────────
 
 const FORTUNE_SYSTEM = `You are a magical fortune teller for children aged 7–13.
-Create a positive, encouraging English fortune message using simple vocabulary (CEFR B1, ~800 core words).
+Create positive, encouraging English fortune messages using simple vocabulary (CEFR B1, ~800 core words).
 Topics: school, friends, hobbies, sports, food, creativity.
 Length: 1–2 short sentences only. Be warm, fun, and imaginative.`
 
 export async function generateFortuneCookieContent() {
-  const text = await callChat([
+  const rawText = await callChat([
     { role: 'system', content: FORTUNE_SYSTEM },
-    { role: 'user',   content: 'Give me one magical fortune cookie message for a child.' },
+    {
+      role: 'user',
+      content: `Create 5 fortune cookie messages for a child, each using a different modal verb.
+Wrap the modal verb in **double asterisks** to mark it for emphasis.
+Return ONLY a valid JSON object with no markdown fences or extra text:
+{
+  "will":   "Use **will** for future certainty (e.g. You **will** find a wonderful surprise today!)",
+  "can":    "Use **can** for ability/possibility (e.g. You **can** achieve anything when you try your best!)",
+  "should": "Use **should** for advice (e.g. You **should** share your amazing ideas with friends!)",
+  "might":  "Use **might** for weak possibility (e.g. Something magical **might** happen if you keep smiling!)",
+  "must":   "Use **must** for strong necessity (e.g. You **must** remember how special and talented you are!)"
+}`,
+    },
   ])
-  return { text: text.trim() }
+
+  let messages
+  try {
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/)
+    messages = JSON.parse(jsonMatch ? jsonMatch[0] : rawText)
+  } catch {
+    throw new Error('Failed to parse fortune cookie JSON from AI response')
+  }
+
+  return {
+    fortune: {
+      will:   { text: messages.will },
+      can:    { text: messages.can },
+      should: { text: messages.should },
+      might:  { text: messages.might },
+      must:   { text: messages.must },
+    }
+  }
 }
 
 // ─── Tarot Card ───────────────────────────────────────────────────────────────
@@ -91,8 +120,7 @@ const TAROT_SYSTEM = `You are a magical fortune teller for children aged 7–13.
 Create positive, encouraging English fortune messages using simple vocabulary (CEFR B1, ~800 core words).
 Topics: school, friends, hobbies, sports, food, creativity. Each sentence should be fun and optimistic.`
 
-export async function generateTarotContent() {
-  // 1. Generate 3 tense-specific sentences
+export async function generateTarotText() {
   const rawText = await callChat([
     { role: 'system', content: TAROT_SYSTEM },
     {
@@ -116,19 +144,18 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
     throw new Error('Failed to parse tarot JSON from AI response')
   }
 
-  // 2. Generate 3 tarot-style images in parallel
-  const imagePromptBase =
-    'Magical tarot card illustration for a children\'s educational app. Dreamy, watercolor style, vibrant colors, child-friendly, no text or letters in the image. Elementary school life with a mystical twist. Scene:'
+  return messages
+}
 
+const TAROT_IMAGE_PROMPT_BASE =
+  'Magical tarot card illustration for a children\'s educational app. Dreamy, watercolor style, vibrant colors, child-friendly, no text or letters in the image. Elementary school life with a mystical twist. Scene:'
+
+export async function generateTarotImages(messages) {
   const [pastImg, presentImg, futureImg] = await Promise.all([
-    callImage(`${imagePromptBase} ${messages.past}`),
-    callImage(`${imagePromptBase} ${messages.present}`),
-    callImage(`${imagePromptBase} ${messages.future}`),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.past}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.present}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.future}`).catch(() => null),
   ])
 
-  return {
-    past:    { text: messages.past,    image: pastImg,    label: 'Past',    tense: 'past' },
-    present: { text: messages.present, image: presentImg, label: 'Present', tense: 'present' },
-    future:  { text: messages.future,  image: futureImg,  label: 'Future',  tense: 'future' },
-  }
+  return { pastImg, presentImg, futureImg }
 }
