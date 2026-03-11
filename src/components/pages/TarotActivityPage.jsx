@@ -450,7 +450,7 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                     color: 'white',
                     fontFamily: 'Nunito, sans-serif',
                     fontWeight: 700,
-                    fontSize: 'clamp(0.7rem, 1.6vw, 0.95rem)',
+                    fontSize: 'clamp(0.85rem, 1.9vw, 1.1rem)',
                     lineHeight: 1.4,
                     margin: 0,
                     textAlign: 'center',
