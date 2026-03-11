@@ -197,9 +197,9 @@ Return ONLY valid JSON, no markdown fences or explanations.`,
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
-// Updated: Modern cute style that appeals to elementary students (2024)
+// Updated: 3D chibi style matching tarot card front character design
 const TAROT_IMAGE_PROMPT_BASE =
-  'Cute modern digital art, bright vibrant colors, cheerful expressive style, soft rounded shapes, magical sparkles, elementary school child, casual school clothes, classroom setting. Scene:'
+  '3D rendered chibi style, Pixar-like smooth shading, glossy vibrant colors, big expressive eyes, cute proportions, magical sparkles and glow effects, elementary school child, casual school clothes, classroom setting. Scene:'
 
 // Generic prompts with realistic school scenarios
 const GENERIC_TAROT_PROMPTS = {
