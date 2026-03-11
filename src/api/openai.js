@@ -116,9 +116,23 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
 
 // ─── Tarot Card ───────────────────────────────────────────────────────────────
 
-const TAROT_SYSTEM = `You are a magical fortune teller for children aged 7–13.
-Create positive, encouraging English fortune messages using simple vocabulary (CEFR B1, ~800 core words).
-Topics: school, friends, hobbies, sports, food, creativity. Each sentence should be fun and optimistic.`
+const TAROT_SYSTEM = `You are a magical fortune teller for elementary school children aged 7–13.
+Create relatable, specific English fortune messages about REAL school life moments.
+Use simple vocabulary (CEFR B1) and vivid details that make kids say "That's exactly like me!"
+
+Focus on concrete situations:
+- Classroom: finishing homework, acing tests, answering questions, group projects, presentations
+- Friendships: playing tag, sharing snacks, helping friends, making new friends, solving arguments
+- Achievements: getting gold stars, winning games, learning new skills, being kind, being brave
+- Emotions: feeling proud, excited, nervous, happy, confident, curious
+- Daily moments: recess, lunch time, art class, PE, music, library, field trips
+
+Each fortune MUST include:
+1. A SPECIFIC action or event (not "studied hard" but "practiced spelling words")
+2. An EMOTION word (proud, excited, brave, happy, etc.)
+3. A POSITIVE result (teacher smiled, friend hugged you, you felt amazing, etc.)
+
+Make it feel personal, like the fortune was written just for them.`
 
 export async function generateTarotText() {
   // Using gpt-3.5-turbo for 3x faster generation (0.5-1s vs 2-3s)
@@ -126,14 +140,27 @@ export async function generateTarotText() {
     { role: 'system', content: TAROT_SYSTEM },
     {
       role: 'user',
-      content: `Create 3 fortune sentences in different English tenses for a child's tarot reading.
-Wrap the key tense word(s) in **double asterisks** to mark them for emphasis.
-Return ONLY a valid JSON object with no markdown fences or extra text:
+      content: `Create 3 specific, relatable fortune sentences for an elementary school child's tarot reading.
+Each fortune MUST include: (1) concrete action, (2) emotion word, (3) positive result.
+
+GOOD examples (specific + relatable):
+- "You **helped** your friend find their lost eraser and they **gave** you a big thankful smile!"
+- "You **are practicing** your times tables and feeling more confident with every answer!"
+- "You **will** make everyone laugh with your creative story during reading time!"
+
+BAD examples (too vague):
+- "You **studied** hard yesterday." (What subject? How did it feel?)
+- "You **are having** a good time." (Doing what? With whom?)
+- "You **will** have a nice day." (Too general, no specific event)
+
+Now create 3 NEW fortunes in these tenses. Be specific about the school moment:
 {
-  "past":    "Simple past tense. Wrap the main past verb(s) in ** (e.g. You **studied** hard and **won** a gold star.)",
-  "present": "Present continuous. Wrap the auxiliary + gerund in ** (e.g. You **are having** an amazing adventure right now.)",
-  "future":  "Future with will. Wrap will in ** (e.g. You **will** find a wonderful surprise waiting for you!)"
-}`,
+  "past": "Simple past with specific event (e.g. aced a math quiz, shared lunch, helped in PE). Wrap 2 main verbs in **",
+  "present": "Present continuous with concrete activity (e.g. building LEGO, reading a book, playing soccer). Wrap be+verb-ing in **",
+  "future": "Future will with specific positive outcome (e.g. teacher praise, friend hug, winning a game). Wrap will in **"
+}
+
+Return ONLY valid JSON, no markdown fences or explanations.`,
     },
   ], 'gpt-3.5-turbo')
 
@@ -149,14 +176,15 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
+// Updated: More specific school scenes for better relatability
 const TAROT_IMAGE_PROMPT_BASE =
-  'Watercolor tarot card, child-friendly magical school scene, vibrant colors. Scene:'
+  'Watercolor illustration, happy elementary school child, magical sparkles, vibrant colors. Scene:'
 
-// Generic prompts optimized for speed while maintaining quality
+// Generic prompts with concrete school moments for relatability
 const GENERIC_TAROT_PROMPTS = {
-  past: 'Child remembering past moments, warm nostalgic sparkles',
-  present: 'Child enjoying present, joyful vibrant glow',
-  future: 'Child dreaming bright future, hopeful starlight',
+  past: 'Child at school desk raising hand proudly, warm golden glow',
+  present: 'Child playing with friends at recess, joyful rainbow sparkles',
+  future: 'Child holding trophy or star sticker, bright hopeful light',
 }
 
 export async function generateTarotImages(messages) {
