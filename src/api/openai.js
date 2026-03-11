@@ -117,30 +117,55 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
 // ─── Tarot Card ───────────────────────────────────────────────────────────────
 
 const TAROT_SYSTEM = `You are a magical fortune teller for Korean elementary school children aged 7–13.
-Create relatable, specific English fortune messages about REAL Korean school life moments.
+Create relatable, specific English fortune messages about their DIVERSE daily life.
 Use simple vocabulary (CEFR B1) and vivid details that make kids say "That's exactly like me!"
 
-Focus on concrete Korean school situations:
-- Classroom: finishing homework, dictation tests (받아쓰기), answering questions, group work (모둠활동), presentations
-- Friendships: playing with seatmates (짝꿍), sharing lunch, helping friends, making new friends, solving arguments
-- School duties: classroom cleaning time (청소시간), lunch duty, being class leader
-- Achievements: getting teacher stamps/stickers (도장), winning games, learning new skills, being kind, being brave
-- Emotions: feeling proud, excited, nervous, happy, confident, curious
-- Daily moments: break time (쉬는 시간), school lunch (급식), PE class (체육), music room, art room, science lab
-- School events: field trips (현장학습), sports day (운동회), talent shows (발표회/학예회)
+Focus on DIVERSE life situations (NOT just school - vary the settings):
+
+**School Life (30%):**
+- Classroom: homework, dictation tests (받아쓰기), answering questions, group work (모둠활동), presentations
+- Friendships: playing with seatmates (짝꿍), sharing lunch, helping friends
+- School duties: cleaning time (청소시간), lunch duty, class leader
+- School events: field trips (현장학습), sports day (운동회), talent shows (발표회)
+
+**After-School Activities (25%):**
+- Academies/Hagwon (학원): English class, math academy, art lessons, taekwondo
+- Practice: piano, violin, swimming, coding class
+- Playground: playing with neighborhood friends, riding bikes, jump rope
+- Library: borrowing books, studying, reading in quiet room
+
+**Home & Family (25%):**
+- Family time: dinner together, talking with parents, board games
+- Helping at home: cooking with mom/dad, organizing room, washing dishes
+- Sibling moments: playing together, sharing toys, helping younger sibling
+- Pet care: feeding dog/cat, walking pet, playing with pet
+
+**Hobbies & Personal Time (15%):**
+- Reading: finishing a book, discovering new stories, comic books
+- Creative: drawing, crafting, building with LEGO, making things
+- Gaming: beating a level, playing with friends online
+- Sports: shooting hoops, jumping rope, riding scooter, soccer
+
+**Weekend & Special Moments (5%):**
+- Family outings: park, museum, shopping mall, restaurant, movie theater
+- Visiting relatives: grandparents' house, cousins, family gatherings
+- Special events: birthday parties, holidays, celebrations
+
+IMPORTANT: Create VARIED scenarios. Don't repeat similar activities.
+Each message should feel fresh and explore different parts of a child's life.
 
 Each fortune MUST include:
-1. A SPECIFIC action or event (not "studied hard" but "practiced dictation words")
-2. An EMOTION word (proud, excited, brave, happy, etc.)
-3. A POSITIVE result (teacher gave stamp, friend smiled, you felt amazing, etc.)
+1. A SPECIFIC action or event with concrete details
+2. An EMOTION word (proud, excited, brave, happy, satisfied, confident, etc.)
+3. A POSITIVE result (someone smiled, you felt good, you succeeded, you learned something, etc.)
 
 You must also provide SHORT scene descriptions (10-15 words max) for image generation.
-Scene descriptions should show realistic school settings (child at desk, classroom, playing, etc.).
+Scene descriptions should match the fortune context (classroom, home kitchen, park, library, etc.).
 
 Make it feel personal, like the fortune was written just for them.`
 
 export async function generateTarotText() {
-  // Using gpt-3.5-turbo for 3x faster generation (0.5-1s vs 2-3s)
+  // Using gpt-4o for better creativity and diversity (2-3s vs 0.5-1s, but much more varied)
   const rawText = await callChat([
     { role: 'system', content: TAROT_SYSTEM },
     {
@@ -148,42 +173,62 @@ export async function generateTarotText() {
       content: `Create 3 specific, relatable fortune sentences for a Korean elementary school child's tarot reading.
 Each fortune MUST include: (1) concrete action, (2) emotion word, (3) positive result.
 
-GOOD examples (Korean school context):
+DIVERSE GOOD examples covering different life areas:
+
+School:
 - "You **cleaned** your classroom carefully and **earned** a special stamp from your teacher!"
-- "You **are sharing** your school lunch with your seatmate and laughing together!"
-- "You **will** ace your dictation test because you practiced so hard!"
+- "You **raised** your hand bravely in class and **answered** the question correctly!"
 
-MORE GOOD examples:
-- "You **helped** your 짝꿍 (seatmate) with a tricky problem and **felt** really helpful!"
-- "You **are playing** tag during break time and feeling so energetic and happy!"
-- "You **will** get picked for the sports day relay team and feel super excited!"
+After-school:
+- "You **practiced** piano at your lesson and **played** a difficult song perfectly!"
+- "You **learned** a new taekwondo kick at the academy and **felt** so powerful!"
 
-BAD examples (too vague):
-- "You **studied** hard yesterday." (What subject? How did it feel?)
-- "You **are having** a good time." (Doing what? With whom?)
+Home & Family:
+- "You **helped** your mom cook dinner and **made** delicious kimchi fried rice together!"
+- "You **played** a board game with your family and everyone **laughed** until their stomachs hurt!"
+
+Hobbies:
+- "You **finished** reading an exciting mystery book and **felt** so satisfied!"
+- "You **built** an amazing LEGO spaceship and **showed** it to everyone with pride!"
+
+Weekend:
+- "You **visited** the park with your grandparents and **fed** the cute ducks together!"
+- "You **are exploring** a cool museum with your family and discovering fascinating things!"
+
+BAD examples (too vague or repetitive):
+- "You **studied** hard yesterday." (What subject? Where? How did it feel?)
+- "You **are having** a good time." (Doing what? With whom? Where?)
 - "You **will** have a nice day." (Too general, no specific event)
+- "You **helped** a friend..." (Too repetitive if used multiple times)
 
-Focus on Korean school life: cleaning time, school lunch, stamps/stickers, group work, seatmates,
-break time, field trips, sports day, talent shows, special classrooms (music/art/science).
+IMPORTANT: Create 3 COMPLETELY DIFFERENT scenarios.
+- Use DIFFERENT settings each time (school, home, academy, park, library, etc.)
+- VARY the activities (NOT just helping friends, sports, or presentations)
+- Cover different parts of daily life (school, after-school, home, hobbies, weekend)
+- Make each fortune feel unique and fresh
 
-Now create 3 NEW fortunes in these tenses. Be specific about the Korean school moment.
+Now create 3 NEW fortunes in these tenses. Be specific and DIVERSE.
 
 ALSO provide a SHORT scene description (10-15 words) for each fortune to help generate matching images.
-Scene should show realistic school settings: child doing specific action, classroom or school environment.
+Scene should match the fortune context:
+- School: classroom, playground, cafeteria, school hallway
+- Home: kitchen, living room, bedroom, dining table
+- Outside: park, library, academy classroom, playground, museum
+- Include appropriate elements and setting for each scenario
 
 Return this JSON format:
 {
   "past": "Simple past fortune text with ** wrapped verbs",
-  "past_scene": "elementary school child [doing action], casual school clothes, classroom",
+  "past_scene": "elementary school child [doing action], appropriate setting matching the fortune",
   "present": "Present continuous fortune text with ** wrapped verbs",
-  "present_scene": "elementary school child [doing action], casual school clothes, classroom",
+  "present_scene": "elementary school child [doing action], appropriate setting matching the fortune",
   "future": "Future will fortune text with ** wrapped verbs",
-  "future_scene": "elementary school child [doing action], casual school clothes, classroom"
+  "future_scene": "elementary school child [doing action], appropriate setting matching the fortune"
 }
 
 Return ONLY valid JSON, no markdown fences or explanations.`,
     },
-  ], 'gpt-3.5-turbo')
+  ], 'gpt-4o')
 
   let messages
   try {
