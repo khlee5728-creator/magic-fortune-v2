@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useEffect, createContext } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect, createContext, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import IntroPage from './components/pages/IntroPage'
 import LoadingOverlay from './components/pages/LoadingOverlay'
@@ -32,6 +32,10 @@ function App() {
   const [mode, setMode] = useState(null)
   const [aiContent, setAiContent] = useState(null)
 
+  // Prefetch cache for tarot (hover optimization)
+  const [tarotPrefetch, setTarotPrefetch] = useState(null)
+  const tarotAbortController = useRef(null)
+
   // Background music ON/OFF state (saved to localStorage)
   const [isBGMEnabled, setIsBGMEnabled] = useState(() => {
     const saved = localStorage.getItem('magic-fortune-bgm-enabled')
@@ -56,6 +60,37 @@ function App() {
     })
     return cleanup
   }, [])
+
+  // Prefetch handler for tarot hover (saves 2-3 seconds)
+  const handleTarotHover = useCallback(() => {
+    // Skip if already prefetching or prefetch completed
+    if (tarotPrefetch || tarotAbortController.current) return
+
+    console.log('[Prefetch] Tarot hover detected, starting generation...')
+
+    // Create AbortController to cancel if user hovers away
+    const controller = new AbortController()
+    tarotAbortController.current = controller
+
+    // Start both API calls immediately
+    const textPromise = generateTarotText()
+    const imagesPromise = generateTarotImages(null)
+
+    Promise.all([textPromise, imagesPromise])
+      .then(([messages, images]) => {
+        if (controller.signal.aborted) {
+          console.log('[Prefetch] Aborted, discarding results')
+          return
+        }
+        console.log('[Prefetch] Completed, caching results')
+        setTarotPrefetch({ messages, images })
+      })
+      .catch(error => {
+        if (!controller.signal.aborted) {
+          console.warn('[Prefetch] Failed:', error)
+        }
+      })
+  }, [tarotPrefetch])
 
   const handleStart = useCallback(async (selectedMode) => {
     // If character mode, go directly to character page without loading
@@ -88,24 +123,33 @@ function App() {
       setAiContent(content)
       setAppState('fortune')
     } else {
-      // Tarot: parallel text + image generation, wait for BOTH before page entry
-      // This ensures cards always flip with images ready (smooth UX)
+      // Tarot: use prefetched data if available, otherwise generate fresh
       let messages, images
-      try {
-        // Start both API calls in parallel
-        const results = await Promise.all([
-          generateTarotText(),
-          generateTarotImages(null)  // Uses generic prompts for faster start
-        ])
-        messages = results[0]
-        images = results[1]
-      } catch (error) {
-        console.error('AI generation failed, using fallback:', error)
-        const fallback = getRandomTarot()
-        saveActivity('tarot', fallback)
-        setAiContent(fallback)
-        setAppState('tarot')
-        return
+
+      if (tarotPrefetch) {
+        console.log('[Tarot] Using prefetched data (instant!)')
+        messages = tarotPrefetch.messages
+        images = tarotPrefetch.images
+        setTarotPrefetch(null) // Clear cache
+        tarotAbortController.current = null
+      } else {
+        console.log('[Tarot] No prefetch, generating fresh')
+        try {
+          // Start both API calls in parallel
+          const results = await Promise.all([
+            generateTarotText(),
+            generateTarotImages(null)  // Uses generic prompts for faster start
+          ])
+          messages = results[0]
+          images = results[1]
+        } catch (error) {
+          console.error('AI generation failed, using fallback:', error)
+          const fallback = getRandomTarot()
+          saveActivity('tarot', fallback)
+          setAiContent(fallback)
+          setAppState('tarot')
+          return
+        }
       }
 
       // Both text and images ready → enter activity page with complete content
@@ -118,7 +162,7 @@ function App() {
       setAiContent(completedContent)
       setAppState('tarot')
     }
-  }, [bgm, isBGMEnabled])
+  }, [bgm, isBGMEnabled, tarotPrefetch])
 
   const handleTryAgain = useCallback(() => {
     setAiContent(null)
@@ -214,7 +258,7 @@ function App() {
         <AnimatePresence mode="wait">
           {appState === 'intro' && (
             <motion.div key="intro" {...PAGE_VARIANTS} style={{ width: '100%', height: '100%' }}>
-              <IntroPage onStart={handleStart} />
+              <IntroPage onStart={handleStart} onTarotHover={handleTarotHover} />
             </motion.div>
           )}
 

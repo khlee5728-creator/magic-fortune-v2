@@ -27,7 +27,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } },
 }
 
-const IntroPage = ({ onStart }) => {
+const IntroPage = ({ onStart, onTarotHover }) => {
   const audioControl = useContext(AudioContext)
 
   // Sound effects
@@ -43,6 +43,13 @@ const IntroPage = ({ onStart }) => {
     audioControl?.onSFXPlay() // Duck background music briefly
     // Small delay to let sound effect play before transition
     setTimeout(() => onStart(mode), 100)
+  }
+
+  // Prefetch handler for tarot hover
+  const handleTarotCardHover = () => {
+    if (onTarotHover) {
+      onTarotHover()
+    }
   }
 
   return (
@@ -302,6 +309,7 @@ const IntroPage = ({ onStart }) => {
             }}
             whileTap={{ scale: 0.96 }}
             onClick={() => handleCardClick('tarot')}
+            onMouseEnter={handleTarotCardHover}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
