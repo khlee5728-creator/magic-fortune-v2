@@ -135,7 +135,7 @@ Each fortune MUST include:
 3. A POSITIVE result (teacher gave stamp, friend smiled, you felt amazing, etc.)
 
 You must also provide SHORT scene descriptions (10-15 words max) for image generation.
-Scene descriptions should show KOREAN school settings (uniforms, Korean classroom, Korean school culture).
+Scene descriptions should show realistic school settings (child at desk, classroom, playing, etc.).
 
 Make it feel personal, like the fortune was written just for them.`
 
@@ -169,16 +169,16 @@ break time, field trips, sports day, talent shows, special classrooms (music/art
 Now create 3 NEW fortunes in these tenses. Be specific about the Korean school moment.
 
 ALSO provide a SHORT scene description (10-15 words) for each fortune to help generate matching images.
-Scene should show KOREAN school settings: Korean students in uniforms or gym clothes, Korean classroom.
+Scene should show realistic school settings: child doing specific action, classroom or school environment.
 
 Return this JSON format:
 {
   "past": "Simple past fortune text with ** wrapped verbs",
-  "past_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom",
+  "past_scene": "elementary school child [doing action], casual school clothes, classroom",
   "present": "Present continuous fortune text with ** wrapped verbs",
-  "present_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom",
+  "present_scene": "elementary school child [doing action], casual school clothes, classroom",
   "future": "Future will fortune text with ** wrapped verbs",
-  "future_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom"
+  "future_scene": "elementary school child [doing action], casual school clothes, classroom"
 }
 
 Return ONLY valid JSON, no markdown fences or explanations.`,
@@ -197,15 +197,15 @@ Return ONLY valid JSON, no markdown fences or explanations.`,
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
-// Updated: Korean school context for better cultural relevance
+// Updated: Natural school setting without cultural stereotypes
 const TAROT_IMAGE_PROMPT_BASE =
-  'Watercolor illustration, Korean elementary school student, school uniform or gym clothes, Korean classroom setting, magical sparkles, vibrant colors. Scene:'
+  'Watercolor illustration, elementary school child, casual school clothes, classroom setting, magical sparkles, vibrant colors. Scene:'
 
-// Generic prompts with Korean school context for cultural relevance
+// Generic prompts with realistic school scenarios
 const GENERIC_TAROT_PROMPTS = {
-  past: 'Korean student receiving stamp from teacher, proud smile, warm atmosphere',
-  present: 'Korean students cleaning classroom together, teamwork and joy, bright energy',
-  future: 'Korean student with test paper showing good grade, hopeful confident expression',
+  past: 'child receiving stamp from teacher, proud smile, warm atmosphere',
+  present: 'children cleaning classroom together, teamwork and joy, bright energy',
+  future: 'child with test paper showing good grade, hopeful confident expression',
 }
 
 export async function generateTarotImages(messages) {
