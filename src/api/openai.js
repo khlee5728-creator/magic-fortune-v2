@@ -150,11 +150,45 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
 const TAROT_IMAGE_PROMPT_BASE =
   'Magical tarot card illustration for a children\'s educational app. Dreamy, watercolor style, vibrant colors, child-friendly, no text or letters in the image. Elementary school life with a mystical twist. Scene:'
 
-export async function generateTarotImages(messages) {
+// Generic prompts that don't depend on text content — allows immediate parallel image generation
+const GENERIC_TAROT_PROMPTS = {
+  past: 'A child reflecting on memories from the past, warm nostalgic atmosphere, magical sparkles',
+  present: 'A child experiencing the present moment with joy and wonder, vibrant energy, magical glow',
+  future: 'A child looking toward a bright future full of possibilities, hopeful atmosphere, magical stars',
+}
+
+export async function generateTarotImages(messages, onImageReady) {
+  // Use generic prompts if messages are not provided (for early prefetch)
+  const usesGeneric = !messages || !messages.past
+  const prompts = usesGeneric ? GENERIC_TAROT_PROMPTS : messages
+
+  // Start all 3 image generations in parallel
+  const pastPromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.past}`)
+    .then(url => {
+      if (onImageReady) onImageReady('past', url)
+      return url
+    })
+    .catch(() => null)
+
+  const presentPromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.present}`)
+    .then(url => {
+      if (onImageReady) onImageReady('present', url)
+      return url
+    })
+    .catch(() => null)
+
+  const futurePromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.future}`)
+    .then(url => {
+      if (onImageReady) onImageReady('future', url)
+      return url
+    })
+    .catch(() => null)
+
+  // Wait for all to complete (for backward compatibility)
   const [pastImg, presentImg, futureImg] = await Promise.all([
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.past}`).catch(() => null),
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.present}`).catch(() => null),
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${messages.future}`).catch(() => null),
+    pastPromise,
+    presentPromise,
+    futurePromise,
   ])
 
   return { pastImg, presentImg, futureImg }

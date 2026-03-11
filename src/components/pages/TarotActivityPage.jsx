@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { RotateCcw, Scroll, Star, Eye } from 'lucide-react'
+import { RotateCcw, Scroll, Star, Eye, Loader2 } from 'lucide-react'
 import TTSPlayer from '../common/TTSPlayer'
 import MagicButton from '../common/MagicButton'
 
@@ -373,14 +373,50 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                   }}
                 />
               ) : null}
-              {/* Placeholder icon — visible until image loads */}
-              {(!image || !imageLoaded) && (
-                <span style={{
-                  fontSize: '3rem',
-                  position: image ? 'absolute' : 'static',
-                  top: '50%', left: '50%',
-                  transform: image ? 'translate(-50%, -50%)' : 'none',
-                }}>{colors.icon}</span>
+              {/* Loading state — visible when no image or image downloading */}
+              {!image && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  position: 'static',
+                }}>
+                  <Loader2
+                    size={40}
+                    className="spin"
+                    style={{ color: colors.label, opacity: 0.8 }}
+                  />
+                  <p style={{
+                    fontSize: '0.7rem',
+                    color: colors.label,
+                    opacity: 0.7,
+                    margin: 0,
+                    textAlign: 'center',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: 600,
+                  }}>
+                    Creating your magical image...
+                  </p>
+                </div>
+              )}
+              {/* Downloading overlay — visible when image URL exists but not loaded yet */}
+              {image && !imageLoaded && (
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.3)',
+                  backdropFilter: 'blur(2px)',
+                }}>
+                  <Loader2
+                    size={32}
+                    className="spin"
+                    style={{ color: 'white' }}
+                  />
+                </div>
               )}
 
               {/* Gradient overlay at bottom of image */}

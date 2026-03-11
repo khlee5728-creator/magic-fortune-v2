@@ -88,10 +88,35 @@ function App() {
       setAiContent(content)
       setAppState('fortune')
     } else {
-      // Tarot: 2-phase loading — text first, images in background
+      // Tarot: TRUE parallel text + image generation for maximum speed
+      // Start both immediately without waiting
+      const textPromise = generateTarotText()
+
+      // Image generation callback — updates state as each image completes
+      const handleImageReady = (tense, url) => {
+        console.log(`[Tarot] ${tense} image ready, preloading...`)
+        const img = new Image()
+        img.onload = () => {
+          console.log(`[Tarot] ${tense} image loaded, updating state`)
+          setAiContent(prev => ({
+            ...prev,
+            [tense]: { ...prev[tense], image: url },
+          }))
+        }
+        img.onerror = () => {
+          console.warn(`[Tarot] Failed to load ${tense} image:`, url)
+        }
+        img.src = url
+      }
+
+      // Start image generation IMMEDIATELY with generic prompts (doesn't wait for text)
+      generateTarotImages(null, handleImageReady).catch(() => {
+        console.warn('[Tarot] Image generation failed, continuing with text only')
+      })
+
       let messages
       try {
-        messages = await generateTarotText()
+        messages = await textPromise
       } catch (error) {
         console.error('AI text generation failed, using fallback:', error)
         const fallback = getRandomTarot()
@@ -101,6 +126,7 @@ function App() {
         return
       }
 
+      // Text ready → enter activity page immediately
       const textOnlyContent = {
         past:    { text: messages.past,    image: null, label: 'Past',    tense: 'past' },
         present: { text: messages.present, image: null, label: 'Present', tense: 'present' },
@@ -110,21 +136,7 @@ function App() {
       setAiContent(textOnlyContent)
       setAppState('tarot')
 
-      // Background image generation during card selection phase
-      generateTarotImages(messages).then(({ pastImg, presentImg, futureImg }) => {
-        // Preload into browser cache before updating state
-        ;[pastImg, presentImg, futureImg].filter(Boolean).forEach(url => {
-          const img = new Image()
-          img.src = url
-        })
-        setAiContent(prev => ({
-          past:    { ...prev.past,    image: pastImg },
-          present: { ...prev.present, image: presentImg },
-          future:  { ...prev.future,  image: futureImg },
-        }))
-      }).catch(() => {
-        console.warn('Tarot image generation failed, continuing with text only')
-      })
+      // Images continue loading in background (started at the same time as text generation)
     }
   }, [bgm, isBGMEnabled])
 
