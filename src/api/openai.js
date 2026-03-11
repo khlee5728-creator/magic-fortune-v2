@@ -116,24 +116,26 @@ Return ONLY a valid JSON object with no markdown fences or extra text:
 
 // ─── Tarot Card ───────────────────────────────────────────────────────────────
 
-const TAROT_SYSTEM = `You are a magical fortune teller for elementary school children aged 7–13.
-Create relatable, specific English fortune messages about REAL school life moments.
+const TAROT_SYSTEM = `You are a magical fortune teller for Korean elementary school children aged 7–13.
+Create relatable, specific English fortune messages about REAL Korean school life moments.
 Use simple vocabulary (CEFR B1) and vivid details that make kids say "That's exactly like me!"
 
-Focus on concrete situations:
-- Classroom: finishing homework, acing tests, answering questions, group projects, presentations
-- Friendships: playing tag, sharing snacks, helping friends, making new friends, solving arguments
-- Achievements: getting gold stars, winning games, learning new skills, being kind, being brave
+Focus on concrete Korean school situations:
+- Classroom: finishing homework, dictation tests (받아쓰기), answering questions, group work (모둠활동), presentations
+- Friendships: playing with seatmates (짝꿍), sharing lunch, helping friends, making new friends, solving arguments
+- School duties: classroom cleaning time (청소시간), lunch duty, being class leader
+- Achievements: getting teacher stamps/stickers (도장), winning games, learning new skills, being kind, being brave
 - Emotions: feeling proud, excited, nervous, happy, confident, curious
-- Daily moments: recess, lunch time, art class, PE, music, library, field trips
+- Daily moments: break time (쉬는 시간), school lunch (급식), PE class (체육), music room, art room, science lab
+- School events: field trips (현장학습), sports day (운동회), talent shows (발표회/학예회)
 
 Each fortune MUST include:
-1. A SPECIFIC action or event (not "studied hard" but "practiced spelling words")
+1. A SPECIFIC action or event (not "studied hard" but "practiced dictation words")
 2. An EMOTION word (proud, excited, brave, happy, etc.)
-3. A POSITIVE result (teacher smiled, friend hugged you, you felt amazing, etc.)
+3. A POSITIVE result (teacher gave stamp, friend smiled, you felt amazing, etc.)
 
 You must also provide SHORT scene descriptions (10-15 words max) for image generation.
-Scene descriptions should capture the KEY VISUAL MOMENT from the fortune text.
+Scene descriptions should show KOREAN school settings (uniforms, Korean classroom, Korean school culture).
 
 Make it feel personal, like the fortune was written just for them.`
 
@@ -143,32 +145,40 @@ export async function generateTarotText() {
     { role: 'system', content: TAROT_SYSTEM },
     {
       role: 'user',
-      content: `Create 3 specific, relatable fortune sentences for an elementary school child's tarot reading.
+      content: `Create 3 specific, relatable fortune sentences for a Korean elementary school child's tarot reading.
 Each fortune MUST include: (1) concrete action, (2) emotion word, (3) positive result.
 
-GOOD examples (specific + relatable):
-- "You **helped** your friend find their lost eraser and they **gave** you a big thankful smile!"
-- "You **are practicing** your times tables and feeling more confident with every answer!"
-- "You **will** make everyone laugh with your creative story during reading time!"
+GOOD examples (Korean school context):
+- "You **cleaned** your classroom carefully and **earned** a special stamp from your teacher!"
+- "You **are sharing** your school lunch with your seatmate and laughing together!"
+- "You **will** ace your dictation test because you practiced so hard!"
+
+MORE GOOD examples:
+- "You **helped** your 짝꿍 (seatmate) with a tricky problem and **felt** really helpful!"
+- "You **are playing** tag during break time and feeling so energetic and happy!"
+- "You **will** get picked for the sports day relay team and feel super excited!"
 
 BAD examples (too vague):
 - "You **studied** hard yesterday." (What subject? How did it feel?)
 - "You **are having** a good time." (Doing what? With whom?)
 - "You **will** have a nice day." (Too general, no specific event)
 
-Now create 3 NEW fortunes in these tenses. Be specific about the school moment.
+Focus on Korean school life: cleaning time, school lunch, stamps/stickers, group work, seatmates,
+break time, field trips, sports day, talent shows, special classrooms (music/art/science).
+
+Now create 3 NEW fortunes in these tenses. Be specific about the Korean school moment.
 
 ALSO provide a SHORT scene description (10-15 words) for each fortune to help generate matching images.
-Scene should capture the KEY VISUAL MOMENT (e.g., "child at desk solving math problem, happy expression, lightbulb moment").
+Scene should show KOREAN school settings: Korean students in uniforms or gym clothes, Korean classroom.
 
 Return this JSON format:
 {
   "past": "Simple past fortune text with ** wrapped verbs",
-  "past_scene": "10-15 word visual scene description",
+  "past_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom",
   "present": "Present continuous fortune text with ** wrapped verbs",
-  "present_scene": "10-15 word visual scene description",
+  "present_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom",
   "future": "Future will fortune text with ** wrapped verbs",
-  "future_scene": "10-15 word visual scene description"
+  "future_scene": "Korean elementary student [doing action], school uniform/gym clothes, Korean classroom"
 }
 
 Return ONLY valid JSON, no markdown fences or explanations.`,
@@ -187,15 +197,15 @@ Return ONLY valid JSON, no markdown fences or explanations.`,
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
-// Updated: More specific school scenes for better relatability
+// Updated: Korean school context for better cultural relevance
 const TAROT_IMAGE_PROMPT_BASE =
-  'Watercolor illustration, happy elementary school child, magical sparkles, vibrant colors. Scene:'
+  'Watercolor illustration, Korean elementary school student, school uniform or gym clothes, Korean classroom setting, magical sparkles, vibrant colors. Scene:'
 
-// Generic prompts with concrete school moments for relatability
+// Generic prompts with Korean school context for cultural relevance
 const GENERIC_TAROT_PROMPTS = {
-  past: 'Child at school desk raising hand proudly, warm golden glow',
-  present: 'Child playing with friends at recess, joyful rainbow sparkles',
-  future: 'Child holding trophy or star sticker, bright hopeful light',
+  past: 'Korean student receiving stamp from teacher, proud smile, warm atmosphere',
+  present: 'Korean students cleaning classroom together, teamwork and joy, bright energy',
+  future: 'Korean student with test paper showing good grade, hopeful confident expression',
 }
 
 export async function generateTarotImages(messages) {

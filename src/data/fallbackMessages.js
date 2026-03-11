@@ -42,62 +42,71 @@ export const FORTUNE_FALLBACKS = [
 ]
 
 export const TAROT_FALLBACKS = [
-  // Original fallbacks (kept for consistency)
+  // Korean school culture: cleaning time, stamps, group work
   {
-    past:    { text: "You **helped** a friend and **made** them feel much better.", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are learning** something new and very interesting today.", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** go on an exciting adventure with your family soon!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **cleaned** your classroom carefully and **earned** a special stamp from your teacher!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are helping** your group finish the project and everyone **is working** together!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** ace your dictation test because you practiced so hard!", image: null, label: "Future",  tense: "future" },
   },
-  // New concrete, relatable fallbacks
+  // Korean school culture: seatmates, school lunch
   {
-    past:    { text: "You **raised** your hand bravely in class and everyone **clapped** for your smart answer!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are drawing** an amazing picture and your creativity **is shining** so bright!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** get a high-five from your teacher for your excellent teamwork!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **shared** your school lunch with your seatmate and **made** them smile so big!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are playing** tag during break time and feeling so energetic and happy!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** get picked for the sports day relay team and feel super excited!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: homework, field trips
   {
-    past:    { text: "You **shared** your favorite snack with a classmate and **made** a new friend!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are playing** a fun game at recess and laughing with your buddies!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** surprise yourself with how fast you **can** run in PE class!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **finished** your homework on time and **felt** really proud of your hard work!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are learning** about Korean history and finding it so interesting!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** have an amazing time on your field trip and learn something new!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: class duties, teacher stamps
   {
-    past:    { text: "You **finished** your homework carefully and **felt** super proud of yourself!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are reading** an exciting book and can't wait to see what happens next!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** make everyone smile with your funny joke at lunch time!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **helped** as lunch duty monitor and **did** such a responsible job!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are solving** a math problem step by step and getting closer to the answer!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** receive a stamp for your excellent participation in class!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: seatmate help, art class
   {
-    past:    { text: "You **helped** your teacher clean up and **earned** a special thank-you sticker!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are building** something creative with blocks and your imagination **is growing**!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** ace your spelling test because you practiced so hard!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **helped** your 짝꿍 (seatmate) understand a difficult problem and **felt** so helpful!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are drawing** a beautiful picture in art class and your teacher **is smiling**!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** make everyone laugh with your funny presentation during show-and-tell!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: music room, science lab
   {
-    past:    { text: "You **stood** up for a friend who was feeling sad and **showed** real kindness!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are learning** a new song in music class and loving every note!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** discover a cool fact in science that **will** blow your mind!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **sang** beautifully in music class and **felt** so confident and proud!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are doing** a cool science experiment and discovering something amazing!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** surprise yourself with how well you **can** play the recorder!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: PE class, classroom duties
   {
-    past:    { text: "You **tried** your best in a tricky math problem and **figured** it out all by yourself!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are exploring** the library and finding amazing books to read!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** get chosen for a special job in class and feel really important!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **tried** your best in PE class and **improved** your dodgeball skills!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are organizing** the classroom bookshelf and doing a neat and tidy job!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** be chosen as class leader and feel really responsible and important!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: break time, helping new students
   {
-    past:    { text: "You **played** tag at recess and **laughed** until your tummy hurt!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are working** on an art project and creating something truly beautiful!", image: null, label: "Present", tense: "present" },
+    past:    { text: "You **played** tag during break time and **laughed** so much with your friends!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are working** on your group art project and creating something beautiful together!", image: null, label: "Present", tense: "present" },
     future:  { text: "You **will** help a new student feel welcome and make their first day awesome!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: good manners, handwriting practice
   {
-    past:    { text: "You **remembered** to say please and thank you and **made** an adult smile!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are practicing** your handwriting and getting better with every letter!", image: null, label: "Present", tense: "present" },
+    past:    { text: "You **greeted** your teacher politely in the morning and **made** them smile brightly!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are practicing** your handwriting and each letter **is getting** neater!", image: null, label: "Present", tense: "present" },
     future:  { text: "You **will** win a fun prize in a classroom game and cheer with joy!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: friendship, talent show
   {
     past:    { text: "You **listened** carefully to your friend's story and **showed** you really care!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are solving** a puzzle and feeling your brain power grow stronger!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** get picked first for a team and feel super proud!", image: null, label: "Future",  tense: "future" },
+    present: { text: "You **are preparing** for the talent show and feeling more confident each day!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** get picked first for your team in sports day and feel super proud!", image: null, label: "Future",  tense: "future" },
   },
+  // Korean school culture: desk organization, computer class
   {
-    past:    { text: "You **cleaned** up your desk neatly and **earned** a compliment from your teacher!", image: null, label: "Past",    tense: "past" },
-    present: { text: "You **are singing** your favorite song and spreading happy vibes all around!", image: null, label: "Present", tense: "present" },
-    future:  { text: "You **will** learn a new skill that **will** make you feel like a superstar!", image: null, label: "Future",  tense: "future" },
+    past:    { text: "You **organized** your desk neatly and **earned** a compliment from your teacher!", image: null, label: "Past",    tense: "past" },
+    present: { text: "You **are learning** how to use the computer in computer class and having fun!", image: null, label: "Present", tense: "present" },
+    future:  { text: "You **will** learn a new skill in after-school activities and feel amazing!", image: null, label: "Future",  tense: "future" },
   },
 ]
 
