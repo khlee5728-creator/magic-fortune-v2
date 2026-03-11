@@ -157,38 +157,16 @@ const GENERIC_TAROT_PROMPTS = {
   future: 'A child looking toward a bright future full of possibilities, hopeful atmosphere, magical stars',
 }
 
-export async function generateTarotImages(messages, onImageReady) {
-  // Use generic prompts if messages are not provided (for early prefetch)
+export async function generateTarotImages(messages) {
+  // Use generic prompts if messages are not provided (allows early parallel start)
   const usesGeneric = !messages || !messages.past
   const prompts = usesGeneric ? GENERIC_TAROT_PROMPTS : messages
 
-  // Start all 3 image generations in parallel
-  const pastPromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.past}`)
-    .then(url => {
-      if (onImageReady) onImageReady('past', url)
-      return url
-    })
-    .catch(() => null)
-
-  const presentPromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.present}`)
-    .then(url => {
-      if (onImageReady) onImageReady('present', url)
-      return url
-    })
-    .catch(() => null)
-
-  const futurePromise = callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.future}`)
-    .then(url => {
-      if (onImageReady) onImageReady('future', url)
-      return url
-    })
-    .catch(() => null)
-
-  // Wait for all to complete (for backward compatibility)
+  // Generate all 3 images in parallel, wait for all to complete
   const [pastImg, presentImg, futureImg] = await Promise.all([
-    pastPromise,
-    presentPromise,
-    futurePromise,
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.past}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.present}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.future}`).catch(() => null),
   ])
 
   return { pastImg, presentImg, futureImg }

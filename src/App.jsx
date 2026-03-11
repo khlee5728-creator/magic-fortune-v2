@@ -88,37 +88,19 @@ function App() {
       setAiContent(content)
       setAppState('fortune')
     } else {
-      // Tarot: TRUE parallel text + image generation for maximum speed
-      // Start both immediately without waiting
-      const textPromise = generateTarotText()
-
-      // Image generation callback — updates state as each image completes
-      const handleImageReady = (tense, url) => {
-        console.log(`[Tarot] ${tense} image ready, preloading...`)
-        const img = new Image()
-        img.onload = () => {
-          console.log(`[Tarot] ${tense} image loaded, updating state`)
-          setAiContent(prev => ({
-            ...prev,
-            [tense]: { ...prev[tense], image: url },
-          }))
-        }
-        img.onerror = () => {
-          console.warn(`[Tarot] Failed to load ${tense} image:`, url)
-        }
-        img.src = url
-      }
-
-      // Start image generation IMMEDIATELY with generic prompts (doesn't wait for text)
-      generateTarotImages(null, handleImageReady).catch(() => {
-        console.warn('[Tarot] Image generation failed, continuing with text only')
-      })
-
-      let messages
+      // Tarot: parallel text + image generation, wait for BOTH before page entry
+      // This ensures cards always flip with images ready (smooth UX)
+      let messages, images
       try {
-        messages = await textPromise
+        // Start both API calls in parallel
+        const results = await Promise.all([
+          generateTarotText(),
+          generateTarotImages(null)  // Uses generic prompts for faster start
+        ])
+        messages = results[0]
+        images = results[1]
       } catch (error) {
-        console.error('AI text generation failed, using fallback:', error)
+        console.error('AI generation failed, using fallback:', error)
         const fallback = getRandomTarot()
         saveActivity('tarot', fallback)
         setAiContent(fallback)
@@ -126,17 +108,15 @@ function App() {
         return
       }
 
-      // Text ready → enter activity page immediately
-      const textOnlyContent = {
-        past:    { text: messages.past,    image: null, label: 'Past',    tense: 'past' },
-        present: { text: messages.present, image: null, label: 'Present', tense: 'present' },
-        future:  { text: messages.future,  image: null, label: 'Future',  tense: 'future' },
+      // Both text and images ready → enter activity page with complete content
+      const completedContent = {
+        past:    { text: messages.past,    image: images.pastImg,    label: 'Past',    tense: 'past' },
+        present: { text: messages.present, image: images.presentImg, label: 'Present', tense: 'present' },
+        future:  { text: messages.future,  image: images.futureImg,  label: 'Future',  tense: 'future' },
       }
-      saveActivity('tarot', textOnlyContent)
-      setAiContent(textOnlyContent)
+      saveActivity('tarot', completedContent)
+      setAiContent(completedContent)
       setAppState('tarot')
-
-      // Images continue loading in background (started at the same time as text generation)
     }
   }, [bgm, isBGMEnabled])
 
