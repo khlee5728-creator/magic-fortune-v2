@@ -498,8 +498,8 @@ const TarotTimeline = ({ revealStep }) => {
       items.push(
         <div key={`line-${i}`} style={{
           flex: 1,
-          height: '2px',
-          marginTop: '21px', // aligns with centre of active circle (42px / 2 − 1)
+          height: '3px',
+          marginTop: '26px', // aligns with centre of active circle (52px / 2 − 1)
           alignSelf: 'flex-start',
           background: (isRevealed || isCurrent) ? colors.border : 'rgba(255,255,255,0.12)',
           transition: 'background 0.5s',
@@ -513,14 +513,14 @@ const TarotTimeline = ({ revealStep }) => {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: i * 0.15 }}
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
       >
         <motion.div
           animate={isCurrent ? { scale: [1, 1.15, 1] } : { scale: 1 }}
           transition={isCurrent ? { duration: 0.6, repeat: 2, ease: 'easeInOut' } : {}}
           style={{
-            width:  isCurrent ? '42px' : '36px',
-            height: isCurrent ? '42px' : '36px',
+            width:  isCurrent ? '52px' : '44px',
+            height: isCurrent ? '52px' : '44px',
             borderRadius: '50%',
             border: `2px solid ${(isRevealed || isCurrent) ? colors.border : 'rgba(255,255,255,0.2)'}`,
             background: isCurrent
@@ -532,10 +532,10 @@ const TarotTimeline = ({ revealStep }) => {
             transition: 'all 0.4s',
           }}
         >
-          <TenseIcon size={isCurrent ? 18 : 15} />
+          <TenseIcon size={isCurrent ? 22 : 18} />
         </motion.div>
         <span style={{
-          fontSize: isCurrent ? '0.65rem' : '0.6rem',
+          fontSize: isCurrent ? '0.8rem' : '0.75rem',
           fontFamily: 'Nunito, sans-serif', fontWeight: 800,
           letterSpacing: '0.1em',
           color: (isRevealed || isCurrent) ? colors.label : 'rgba(255,255,255,0.25)',
@@ -552,7 +552,7 @@ const TarotTimeline = ({ revealStep }) => {
       display: 'flex',
       alignItems: 'flex-start',
       width: '100%',
-      maxWidth: '720px',
+      maxWidth: '900px',
       padding: '0 2rem',
     }}>
       {items}
