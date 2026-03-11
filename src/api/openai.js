@@ -132,6 +132,9 @@ Each fortune MUST include:
 2. An EMOTION word (proud, excited, brave, happy, etc.)
 3. A POSITIVE result (teacher smiled, friend hugged you, you felt amazing, etc.)
 
+You must also provide SHORT scene descriptions (10-15 words max) for image generation.
+Scene descriptions should capture the KEY VISUAL MOMENT from the fortune text.
+
 Make it feel personal, like the fortune was written just for them.`
 
 export async function generateTarotText() {
@@ -153,11 +156,19 @@ BAD examples (too vague):
 - "You **are having** a good time." (Doing what? With whom?)
 - "You **will** have a nice day." (Too general, no specific event)
 
-Now create 3 NEW fortunes in these tenses. Be specific about the school moment:
+Now create 3 NEW fortunes in these tenses. Be specific about the school moment.
+
+ALSO provide a SHORT scene description (10-15 words) for each fortune to help generate matching images.
+Scene should capture the KEY VISUAL MOMENT (e.g., "child at desk solving math problem, happy expression, lightbulb moment").
+
+Return this JSON format:
 {
-  "past": "Simple past with specific event (e.g. aced a math quiz, shared lunch, helped in PE). Wrap 2 main verbs in **",
-  "present": "Present continuous with concrete activity (e.g. building LEGO, reading a book, playing soccer). Wrap be+verb-ing in **",
-  "future": "Future will with specific positive outcome (e.g. teacher praise, friend hug, winning a game). Wrap will in **"
+  "past": "Simple past fortune text with ** wrapped verbs",
+  "past_scene": "10-15 word visual scene description",
+  "present": "Present continuous fortune text with ** wrapped verbs",
+  "present_scene": "10-15 word visual scene description",
+  "future": "Future will fortune text with ** wrapped verbs",
+  "future_scene": "10-15 word visual scene description"
 }
 
 Return ONLY valid JSON, no markdown fences or explanations.`,
@@ -190,13 +201,32 @@ const GENERIC_TAROT_PROMPTS = {
 export async function generateTarotImages(messages) {
   // Use generic prompts if messages are not provided (allows early parallel start)
   const usesGeneric = !messages || !messages.past
-  const prompts = usesGeneric ? GENERIC_TAROT_PROMPTS : messages
+
+  // Extract scene descriptions if available, otherwise use text or generic prompts
+  let pastPrompt, presentPrompt, futurePrompt
+
+  if (usesGeneric) {
+    // No messages provided - use generic prompts
+    pastPrompt = GENERIC_TAROT_PROMPTS.past
+    presentPrompt = GENERIC_TAROT_PROMPTS.present
+    futurePrompt = GENERIC_TAROT_PROMPTS.future
+  } else if (messages.past_scene && messages.present_scene && messages.future_scene) {
+    // Scene descriptions available - use them for better image-text matching
+    pastPrompt = messages.past_scene
+    presentPrompt = messages.present_scene
+    futurePrompt = messages.future_scene
+  } else {
+    // Fallback to text prompts (old behavior)
+    pastPrompt = messages.past
+    presentPrompt = messages.present
+    futurePrompt = messages.future
+  }
 
   // Generate all 3 images in parallel, wait for all to complete
   const [pastImg, presentImg, futureImg] = await Promise.all([
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.past}`).catch(() => null),
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.present}`).catch(() => null),
-    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${prompts.future}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${pastPrompt}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${presentPrompt}`).catch(() => null),
+    callImage(`${TAROT_IMAGE_PROMPT_BASE} ${futurePrompt}`).catch(() => null),
   ])
 
   return { pastImg, presentImg, futureImg }

@@ -62,7 +62,7 @@ function App() {
   }, [])
 
   // Prefetch handler for tarot hover (saves 2-3 seconds)
-  const handleTarotHover = useCallback(() => {
+  const handleTarotHover = useCallback(async () => {
     // Skip if already prefetching or prefetch completed
     if (tarotPrefetch || tarotAbortController.current) return
 
@@ -72,24 +72,30 @@ function App() {
     const controller = new AbortController()
     tarotAbortController.current = controller
 
-    // Start both API calls immediately
-    const textPromise = generateTarotText()
-    const imagesPromise = generateTarotImages(null)
+    try {
+      // Generate text first (includes scene descriptions)
+      const messages = await generateTarotText()
 
-    Promise.all([textPromise, imagesPromise])
-      .then(([messages, images]) => {
-        if (controller.signal.aborted) {
-          console.log('[Prefetch] Aborted, discarding results')
-          return
-        }
-        console.log('[Prefetch] Completed, caching results')
-        setTarotPrefetch({ messages, images })
-      })
-      .catch(error => {
-        if (!controller.signal.aborted) {
-          console.warn('[Prefetch] Failed:', error)
-        }
-      })
+      if (controller.signal.aborted) {
+        console.log('[Prefetch] Aborted after text generation')
+        return
+      }
+
+      // Use scene descriptions to generate matching images
+      const images = await generateTarotImages(messages)
+
+      if (controller.signal.aborted) {
+        console.log('[Prefetch] Aborted after image generation')
+        return
+      }
+
+      console.log('[Prefetch] Completed, caching results')
+      setTarotPrefetch({ messages, images })
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        console.warn('[Prefetch] Failed:', error)
+      }
+    }
   }, [tarotPrefetch])
 
   const handleStart = useCallback(async (selectedMode) => {
@@ -135,13 +141,10 @@ function App() {
       } else {
         console.log('[Tarot] No prefetch, generating fresh')
         try {
-          // Start both API calls in parallel
-          const results = await Promise.all([
-            generateTarotText(),
-            generateTarotImages(null)  // Uses generic prompts for faster start
-          ])
-          messages = results[0]
-          images = results[1]
+          // Generate text first (includes scene descriptions)
+          messages = await generateTarotText()
+          // Use scene descriptions to generate matching images
+          images = await generateTarotImages(messages)
         } catch (error) {
           console.error('AI generation failed, using fallback:', error)
           const fallback = getRandomTarot()
