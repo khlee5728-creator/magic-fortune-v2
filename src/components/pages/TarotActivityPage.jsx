@@ -302,7 +302,7 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay, type: 'spring', stiffness: 200, damping: 18 }}
       style={{
-        width:  'clamp(150px, 22vw, 240px)',
+        width:  'clamp(180px, 26vw, 300px)',
         flexShrink: 0,
       }}
     >
