@@ -197,9 +197,9 @@ Return ONLY valid JSON, no markdown fences or explanations.`,
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
-// Updated: Natural school setting without cultural stereotypes
+// Updated: Modern cute style that appeals to elementary students (2024)
 const TAROT_IMAGE_PROMPT_BASE =
-  'Watercolor illustration, elementary school child, casual school clothes, classroom setting, magical sparkles, vibrant colors. Scene:'
+  'Cute modern digital art, bright vibrant colors, cheerful expressive style, soft rounded shapes, magical sparkles, elementary school child, casual school clothes, classroom setting. Scene:'
 
 // Generic prompts with realistic school scenarios
 const GENERIC_TAROT_PROMPTS = {
