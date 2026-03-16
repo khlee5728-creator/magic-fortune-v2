@@ -72,8 +72,15 @@ const CharacterSprite = ({
         <motion.img
           src={idleImage}
           alt={`${character} character`}
-          animate={{ opacity: isTalking ? 0 : 1 }}
-          transition={{ duration: 0.3 }}
+          animate={{
+            opacity: isTalking ? 0 : 1,
+            scale: isTalking ? 0.98 : 1,
+            y: 0,
+            filter: isTalking
+              ? 'blur(2px) drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))'
+              : 'blur(0px) drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))',
+          }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           style={{
             position: 'absolute',
             top: 0,
@@ -82,15 +89,21 @@ const CharacterSprite = ({
             height: '100%',
             objectFit: 'contain',
             objectPosition: 'bottom center',
-            filter: 'drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))',
             pointerEvents: 'none',
           }}
         />
 
         {/* Sprite sheet animation (only visible when talking) */}
         <motion.div
-          animate={{ opacity: isTalking ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
+          animate={{
+            opacity: isTalking ? 1 : 0,
+            scale: isTalking ? 1 : 1.02,
+            y: 0,
+            filter: isTalking
+              ? 'blur(0px) drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))'
+              : 'blur(2px) drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))',
+          }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           style={{
             position: 'absolute',
             top: 0,
@@ -98,7 +111,6 @@ const CharacterSprite = ({
             width: '100%',
             height: '100%',
             overflow: 'hidden',
-            filter: 'drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))',
             pointerEvents: 'none',
           }}
         >
@@ -110,8 +122,8 @@ const CharacterSprite = ({
               backgroundSize: `${spriteColumns * 100}% ${spriteRows * 100}%`,
               backgroundPosition: '0% 0%',
               backgroundRepeat: 'no-repeat',
-              transform: 'scale(0.85)',
-              transformOrigin: 'center bottom',
+              transform: 'scale(0.80) translateY(10%)',
+              transformOrigin: 'center center',
               animation: isTalking
                 ? `sprite-talk-grid ${frameDuration * spriteFrames}s steps(1) infinite`
                 : 'none',

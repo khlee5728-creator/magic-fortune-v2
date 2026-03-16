@@ -8,11 +8,11 @@ const BASE_URL = 'https://devplayground.polarislabs.ai.kr/api'
 
 // ─── Low-level helpers ───────────────────────────────────────────────────────
 
-export async function callChat(messages, model = 'gpt-4o') {
+export async function callChat(messages, model = 'gpt-4o', temperature = 1.0) {
   const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages }),
+    body: JSON.stringify({ model, messages, temperature }),
   })
   if (!res.ok) {
     const err = await res.text().catch(() => res.statusText)
@@ -45,15 +45,16 @@ async function callImage(prompt) {
  * Generate TTS audio blob URL.
  * Caller is responsible for revoking the returned object URL.
  *
- * Results are cached by text key (module-level Map).
- * Subsequent calls for the same text skip the API and return a new URL
+ * Results are cached by text+voice key (module-level Map).
+ * Subsequent calls for the same text AND voice skip the API and return a new URL
  * from the cached Blob — zero latency, zero extra API cost.
  */
-const ttsCache = new Map() // text → Blob
+const ttsCache = new Map() // "text|voice" → Blob
 
-export async function callTTS(text, voice = 'nova') {
-  if (ttsCache.has(text)) {
-    return URL.createObjectURL(ttsCache.get(text))
+export async function callTTS(text, voice = 'shimmer') {
+  const cacheKey = `${text}|${voice}`
+  if (ttsCache.has(cacheKey)) {
+    return URL.createObjectURL(ttsCache.get(cacheKey))
   }
 
   const res = await fetch(`${BASE_URL}/audio/speech`, {
@@ -66,7 +67,7 @@ export async function callTTS(text, voice = 'nova') {
     throw new Error(`TTS API ${res.status}: ${err}`)
   }
   const blob = await res.blob()
-  ttsCache.set(text, blob)
+  ttsCache.set(cacheKey, blob)
   return URL.createObjectURL(blob)
 }
 
@@ -165,35 +166,85 @@ Scene descriptions should match the fortune context (classroom, home kitchen, pa
 Make it feel personal, like the fortune was written just for them.`
 
 export async function generateTarotText() {
-  // Using gpt-4o for better creativity and diversity (2-3s vs 0.5-1s, but much more varied)
+  // Randomly select 3 different categories for diversity (no repeats)
+  const allCategories = [
+    'School Life',
+    'After-School Activities',
+    'Home & Family',
+    'Hobbies & Personal Time',
+    'Weekend & Special Moments'
+  ]
+
+  // Shuffle and pick 3 unique categories
+  const shuffled = [...allCategories].sort(() => Math.random() - 0.5)
+  const [pastCategory, presentCategory, futureCategory] = shuffled.slice(0, 3)
+
+  // Example sets for rotation (prevents AI from using same examples every time)
+  const exampleSets = [
+    {
+      school: "You **cleaned** your classroom carefully and **earned** a special stamp from your teacher!",
+      afterSchool: "You **practiced** piano at your lesson and **played** a difficult song perfectly!",
+      home: "You **helped** your mom cook dinner and **made** delicious kimchi fried rice together!",
+      hobbies: "You **finished** reading an exciting mystery book and **felt** so satisfied!",
+      weekend: "You **visited** the park with your grandparents and **fed** the cute ducks together!"
+    },
+    {
+      school: "You **raised** your hand bravely in class and **answered** the question correctly!",
+      afterSchool: "You **learned** a new taekwondo kick at the academy and **felt** so powerful!",
+      home: "You **played** a board game with your family and everyone **laughed** until their stomachs hurt!",
+      hobbies: "You **built** an amazing LEGO spaceship and **showed** it to everyone with pride!",
+      weekend: "You **are exploring** a cool museum with your family and discovering fascinating things!"
+    },
+    {
+      school: "You **solved** a tricky math problem and **felt** incredibly proud of yourself!",
+      afterSchool: "You **swam** your fastest lap in swimming class and **beat** your personal record!",
+      home: "You **organized** your room beautifully and **found** your favorite toy you lost!",
+      hobbies: "You **drew** an amazing portrait and **surprised** everyone with your talent!",
+      weekend: "You **went** to a birthday party and **had** the best time playing games!"
+    },
+    {
+      school: "You **worked** together with your group and **completed** the project perfectly!",
+      afterSchool: "You **practiced** violin and **played** a beautiful melody without mistakes!",
+      home: "You **helped** your dad wash the car and **made** it sparkle like new!",
+      hobbies: "You **coded** a fun computer game and **showed** it to your friends!",
+      weekend: "You **visited** your grandma's house and **enjoyed** her delicious homemade cookies!"
+    }
+  ]
+
+  // Randomly select an example set
+  const selectedExamples = exampleSets[Math.floor(Math.random() * exampleSets.length)]
+
+  // Using gpt-4o with temperature 1.2 for better creativity and diversity
   const rawText = await callChat([
     { role: 'system', content: TAROT_SYSTEM },
     {
       role: 'user',
       content: `Create 3 specific, relatable fortune sentences for a Korean elementary school child's tarot reading.
+
+MANDATORY CATEGORY ASSIGNMENTS (you MUST follow these):
+- Past fortune: MUST be about "${pastCategory}"
+- Present fortune: MUST be about "${presentCategory}"
+- Future fortune: MUST be about "${futureCategory}"
+
+Create 3 specific, relatable fortune sentences for a Korean elementary school child's tarot reading.
 Each fortune MUST include: (1) concrete action, (2) emotion word, (3) positive result.
 
-DIVERSE GOOD examples covering different life areas:
+DIVERSE GOOD examples (use these as inspiration, but create NEW scenarios):
 
-School:
-- "You **cleaned** your classroom carefully and **earned** a special stamp from your teacher!"
-- "You **raised** your hand bravely in class and **answered** the question correctly!"
+School Life example:
+- ${selectedExamples.school}
 
-After-school:
-- "You **practiced** piano at your lesson and **played** a difficult song perfectly!"
-- "You **learned** a new taekwondo kick at the academy and **felt** so powerful!"
+After-School Activities example:
+- ${selectedExamples.afterSchool}
 
-Home & Family:
-- "You **helped** your mom cook dinner and **made** delicious kimchi fried rice together!"
-- "You **played** a board game with your family and everyone **laughed** until their stomachs hurt!"
+Home & Family example:
+- ${selectedExamples.home}
 
-Hobbies:
-- "You **finished** reading an exciting mystery book and **felt** so satisfied!"
-- "You **built** an amazing LEGO spaceship and **showed** it to everyone with pride!"
+Hobbies & Personal Time example:
+- ${selectedExamples.hobbies}
 
-Weekend:
-- "You **visited** the park with your grandparents and **fed** the cute ducks together!"
-- "You **are exploring** a cool museum with your family and discovering fascinating things!"
+Weekend & Special Moments example:
+- ${selectedExamples.weekend}
 
 BAD examples (too vague or repetitive):
 - "You **studied** hard yesterday." (What subject? Where? How did it feel?)
@@ -228,7 +279,7 @@ Return this JSON format:
 
 Return ONLY valid JSON, no markdown fences or explanations.`,
     },
-  ], 'gpt-4o')
+  ], 'gpt-4o', 1.2)
 
   let messages
   try {
@@ -242,9 +293,9 @@ Return ONLY valid JSON, no markdown fences or explanations.`,
 }
 
 // Optimized: Shorter prompts = faster DALL-E generation (1-3s saved per image)
-// Updated: 3D chibi style with subtle magical atmosphere (reduced excessive sparkles)
+// Updated: Balanced character proportions with environmental storytelling (reduced face size, increased scene context)
 const TAROT_IMAGE_PROMPT_BASE =
-  '3D rendered chibi style, Pixar-like smooth shading, glossy vibrant colors, big expressive eyes, cute proportions, subtle magical aura, soft dreamy lighting, enchanting atmosphere, East Asian elementary school child, casual school clothes, classroom setting. Scene:'
+  '3D rendered illustration, Pixar-style character design, balanced proportions (head-to-body ratio 1:3), glossy vibrant colors, expressive friendly eyes, soft dreamy lighting, enchanting atmosphere, medium shot composition, full body visible, character occupies 40-50% of frame, environmental storytelling with clear background details, East Asian elementary school child, casual school clothes, focus on activity and environment. Scene:'
 
 // Generic prompts with realistic school scenarios
 const GENERIC_TAROT_PROMPTS = {

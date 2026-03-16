@@ -4,6 +4,7 @@ import { RotateCcw } from 'lucide-react'
 import TTSPlayer from '../common/TTSPlayer'
 import MagicButton from '../common/MagicButton'
 import CharacterVideo from '../common/CharacterVideo'
+import useSFX from '../../hooks/useSFX'
 
 const COOKIE_COUNT = 5
 
@@ -159,15 +160,38 @@ function parseModalText(text, modalConfig) {
  *  - Grammar tips explain usage of each modal verb
  */
 const FortuneActivityPage = ({ content, onTryAgain }) => {
+  const sfx = useSFX()
   const [cookieStates, setCookieStates] = useState(Array(COOKIE_COUNT).fill('idle'))
   const [revealed, setRevealed] = useState(false)
   const [selectedModalIdx, setSelectedModalIdx] = useState(null)
+  const [showGrammarTip, setShowGrammarTip] = useState(false)
+
+  // Notify parent when fortune is revealed (activity finished)
+  useEffect(() => {
+    if (revealed) {
+      //console.error('컨텐츠 마지막 페이지 확인!! ');
+      // 컨텐츠의 마지막 페이지에서 실행
+      window.parent.postMessage({
+        op: 'contentFinished',
+        data: {},
+        from: 'child'
+      }, '*');
+    }
+  }, [revealed])
 
   const handleCookieClick = (idx) => {
     if (revealed || cookieStates.some((s) => s !== 'idle')) return
+
+    sfx.playCookieCrack() // Cookie crack sound on click
+
     setSelectedModalIdx(idx)
     setCookieStates(cookieStates.map((_, i) => (i === idx ? 'selected' : 'fading')))
-    setTimeout(() => setRevealed(true), 750)
+    setTimeout(() => {
+      setRevealed(true)
+      setTimeout(() => {
+        sfx.playMagicReveal() // Magic reveal sound when fortune appears
+      }, 600)
+    }, 750)
   }
 
   // Get modal verb data based on selected cookie
@@ -218,14 +242,14 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
         >
           <h2
             className="font-magic text-gold-shine"
-            style={{ fontSize: '1.8rem', margin: 0, fontWeight: 700 }}
+            style={{ fontSize: 'clamp(1.75rem, 4vw, 2.2rem)', margin: 0, fontWeight: 700 }}
           >
             {revealed
               ? `Your ${modalConfig?.label || ''} Fortune!`
               : 'Choose Your Modal Verb Cookie!'}
           </h2>
           {!revealed && (
-            <p style={{ color: '#c4b5fd', fontSize: '0.9rem', margin: '0.4rem 0 0', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}>
+            <p style={{ color: '#c4b5fd', fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', margin: '0.4rem 0 0', fontFamily: 'Nunito, sans-serif', fontWeight: 600 }}>
               Each cookie teaches a different modal verb!
             </p>
           )}
@@ -293,32 +317,78 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                 opacity: 0.7,
               }} />
 
-              {/* Modal Badge */}
+              {/* Top decorative stars */}
+              <div style={{
+                fontSize: '1.2rem',
+                marginBottom: '1.5rem',
+                marginTop: '0.5rem',
+                opacity: 0.6,
+                letterSpacing: '0.5rem'
+              }}>
+                ✦ ✦ ✦
+              </div>
+
+              {/* Fortune Message - Main Focus */}
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                  color: '#2d1500',
+                  fontFamily: 'Cinzel, serif',
+                  fontWeight: 600,
+                  fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
+                  lineHeight: 1.85,
+                  margin: '0 0 1.5rem 0',
+                  letterSpacing: '0.03em',
+                  padding: '0 1rem',
+                }}
+              >
+                "{parseModalText(fortuneText, modalConfig)}"
+              </motion.p>
+
+              {/* Bottom decorative stars */}
+              <div style={{
+                fontSize: '1.2rem',
+                marginBottom: '1.5rem',
+                opacity: 0.6,
+                letterSpacing: '0.5rem'
+              }}>
+                ✦ ✦ ✦
+              </div>
+
+              {/* Divider line */}
+              <div style={{
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, #c8a84b 30%, #c8a84b 70%, transparent)',
+                margin: '0 1.5rem 1rem',
+                opacity: 0.4,
+              }} />
+
+              {/* Modal Badge - Smaller, at bottom */}
               {modalConfig && (
                 <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '16px',
-                    background: `linear-gradient(135deg, ${modalConfig.color}15, ${modalConfig.color}08)`,
-                    border: `2px solid ${modalConfig.color}`,
+                    gap: '0.4rem',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '12px',
+                    background: `${modalConfig.color}12`,
+                    border: `1.5px solid ${modalConfig.color}40`,
                     marginBottom: '0.75rem',
-                    marginTop: '0.25rem',
                   }}
                 >
-                  <span style={{ fontSize: '1.3rem' }}>{modalConfig.icon}</span>
+                  <span style={{ fontSize: '0.95rem' }}>{modalConfig.icon}</span>
                   <span style={{
                     color: modalConfig.color,
                     fontFamily: 'Nunito, sans-serif',
-                    fontWeight: 900,
-                    fontSize: '1rem',
+                    fontWeight: 800,
+                    fontSize: 'clamp(0.75rem, 1.6vw, 0.85rem)',
                     letterSpacing: '0.05em',
-                    textShadow: `0 0 12px ${modalConfig.color}33`,
                   }}>
                     {modalConfig.label}
                   </span>
@@ -326,68 +396,85 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                     color: '#7d5a3a',
                     fontFamily: 'Nunito, sans-serif',
                     fontWeight: 600,
-                    fontSize: '0.8rem',
-                    opacity: 0.7,
+                    fontSize: 'clamp(0.7rem, 1.4vw, 0.8rem)',
+                    opacity: 0.65,
                   }}>
-                    {modalConfig.description}
+                    · {modalConfig.description}
                   </span>
                 </motion.div>
               )}
 
-              <div style={{ fontSize: '1.4rem', marginBottom: '0.6rem', marginTop: '0rem', opacity: 0.85 }}>✦</div>
-              <p style={{
-                color: '#2d1500',
-                fontFamily: 'Cinzel, serif',
-                fontWeight: 600,
-                fontSize: '1.15rem',
-                lineHeight: 1.75,
-                margin: '0',
-                letterSpacing: '0.03em',
-              }}>
-                "{parseModalText(fortuneText, modalConfig)}"
-              </p>
-
-              {/* Grammar Tip Section */}
+              {/* Grammar Tip - Collapsible */}
               {fortuneTip && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  style={{
-                    marginTop: '1.25rem',
-                    padding: '0.85rem 1.25rem',
-                    borderRadius: '8px',
-                    background: `linear-gradient(135deg, ${modalConfig?.lightColor || '#fef3c7'}44, ${modalConfig?.lightColor || '#fef3c7'}22)`,
-                    border: `1.5px solid ${modalConfig?.color || '#f59e0b'}33`,
-                  }}
                 >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '0.4rem',
-                  }}>
-                    <span style={{ fontSize: '1.1rem' }}>💡</span>
-                    <span style={{
+                  <motion.button
+                    onClick={() => setShowGrammarTip(!showGrammarTip)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      padding: '0.5rem 1rem',
+                      border: 'none',
+                      background: 'transparent',
                       color: '#7d5a3a',
                       fontFamily: 'Nunito, sans-serif',
-                      fontWeight: 800,
-                      fontSize: '0.85rem',
-                      letterSpacing: '0.03em',
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.75rem, 1.6vw, 0.85rem)',
+                      cursor: 'pointer',
+                      marginBottom: showGrammarTip ? '0.5rem' : '0',
+                      opacity: 0.8,
+                      transition: 'opacity 0.2s',
+                    }}
+                  >
+                    <span style={{ fontSize: '0.9rem' }}>💡</span>
+                    <span>Grammar Tip</span>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      transform: showGrammarTip ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s',
+                      display: 'inline-block',
                     }}>
-                      Grammar Tip
+                      ▼
                     </span>
-                  </div>
-                  <p style={{
-                    color: '#5a3e2b',
-                    fontFamily: 'Nunito, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    lineHeight: 1.6,
-                    margin: '0',
-                  }}>
-                    {parseModalText(fortuneTip, modalConfig)}
-                  </p>
+                  </motion.button>
+
+                  <AnimatePresence>
+                    {showGrammarTip && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <div style={{
+                          padding: '0.75rem 1rem',
+                          borderRadius: '6px',
+                          background: `linear-gradient(135deg, ${modalConfig?.lightColor || '#fef3c7'}30, ${modalConfig?.lightColor || '#fef3c7'}15)`,
+                          border: `1px solid ${modalConfig?.color || '#f59e0b'}25`,
+                          marginBottom: '0.5rem',
+                        }}>
+                          <p style={{
+                            color: '#5a3e2b',
+                            fontFamily: 'Nunito, sans-serif',
+                            fontWeight: 600,
+                            fontSize: 'clamp(0.8rem, 1.7vw, 0.95rem)',
+                            lineHeight: 1.6,
+                            margin: '0',
+                          }}>
+                            {parseModalText(fortuneTip, modalConfig)}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </motion.div>
@@ -405,6 +492,7 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
             >
               <TTSPlayer
                 text={fortuneText}
+                voice="nova"
                 autoPlay
                 idleLabel="Listen again"
                 buttonStyle={{
@@ -415,14 +503,14 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
                   fontWeight: 800,
                   borderRadius: '16px',
                   padding: '12px 28px',
-                  fontSize: '1.05rem',
+                  fontSize: 'clamp(0.9rem, 2vw, 1.05rem)',
                   backdropFilter: 'blur(6px)',
                   letterSpacing: '0.02em',
                 }}
               />
               <MagicButton onClick={onTryAgain} size="md" variant="secondary">
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <RotateCcw size={16} /> Try Again
+                  <RotateCcw size={16} /> Play Again
                 </span>
               </MagicButton>
             </motion.div>
@@ -473,7 +561,7 @@ const CookieSlot = ({ state, onClick, modalType, modalConfig }) => {
             color: modalConfig.lightColor,
             fontFamily: 'Nunito, sans-serif',
             fontWeight: 800,
-            fontSize: '0.85rem',
+            fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
             letterSpacing: '0.03em',
             textShadow: `0 0 8px ${modalConfig.color}66`,
           }}>

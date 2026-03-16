@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
@@ -12,6 +13,31 @@ import { X } from 'lucide-react'
  */
 const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
   if (!category) return null
+
+  // Language tab state
+  const [selectedLanguage, setSelectedLanguage] = useState('en')
+
+  // Icon mapping: Emoji → Custom SVG file path (same as Orb.jsx)
+  const iconMap = {
+    '✨': '/icons/luna/eye-icon.svg',           // Luna: About - 미래를 보는 눈
+    '🌙': '/icons/luna/moon-stars-icon.svg',    // Luna: Favorites - 별관찰+달
+    '🎭': '/icons/luna/smiley-wink-icon.svg',   // Luna: TMI - 귀여운 비밀
+    '🔮': '/icons/luna/cards-icon.svg',         // Luna: Items - 타로 카드
+    '🌟': '/icons/noir/star-icon.svg',          // Noir: Hunter - 빛나는 별
+    '🔔': '/icons/noir/bell-icon.svg',          // Noir: Favorites - 은방울
+    '💭': '/icons/noir/chat-circle-icon.svg',   // Noir: Logic - 생각 구름
+    '😺': '/icons/noir/cat-icon.svg',           // Noir: Moods - 고양이 얼굴
+  }
+
+  const iconSrc = iconMap[category.icon]
+
+  // Icons for sentence cards
+  const sentenceIcons = ['🔮', '✨', '💫', '🌟', '💖', '😊', '🎯', '⭐']
+
+  // Split text into sentences (by newline)
+  const getSentences = (text) => {
+    return text.split('\n').filter(s => s.trim().length > 0)
+  }
 
   // Color schemes for different characters
   const colorSchemes = {
@@ -102,12 +128,24 @@ const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '2rem' }}>{category.icon}</span>
+                {iconSrc ? (
+                  <img
+                    src={iconSrc}
+                    alt={category.label.en}
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      filter: 'drop-shadow(0 2px 8px rgba(255, 255, 255, 0.4))',
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontSize: '2rem' }}>{category.icon}</span>
+                )}
                 <div>
                   <h3
                     className="font-magic"
                     style={{
-                      fontSize: '1.5rem',
+                      fontSize: 'clamp(1.4rem, 3vw, 1.75rem)',
                       color: '#fde68a',
                       margin: 0,
                       textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
@@ -117,7 +155,7 @@ const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
                   </h3>
                   <p
                     style={{
-                      fontSize: '0.9rem',
+                      fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
                       color: '#e0e7ff',
                       margin: 0,
                       marginTop: '2px',
@@ -160,60 +198,112 @@ const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
                 padding: '24px 32px 32px',
               }}
             >
-              {/* English content */}
-              <div style={{ marginBottom: '24px' }}>
-                <div
+              {/* Language Tabs */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  marginBottom: '20px',
+                  justifyContent: 'center',
+                }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedLanguage('en')}
                   style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#fbbf24',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  🇬🇧 English
-                </div>
-                <p
-                  style={{
-                    fontSize: '1rem',
-                    lineHeight: 1.7,
+                    padding: '10px 24px',
+                    borderRadius: '12px',
+                    border: selectedLanguage === 'en'
+                      ? `2px solid ${scheme.border}`
+                      : '2px solid rgba(255, 255, 255, 0.2)',
+                    background: selectedLanguage === 'en'
+                      ? 'rgba(255, 255, 255, 0.2)'
+                      : 'rgba(255, 255, 255, 0.05)',
                     color: '#ffffff',
-                    margin: 0,
-                    whiteSpace: 'pre-line',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                    fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: selectedLanguage === 'en'
+                      ? `0 4px 12px ${scheme.glow}`
+                      : 'none',
                   }}
                 >
-                  {category.content.en}
-                </p>
+                  English
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedLanguage('ko')}
+                  style={{
+                    padding: '10px 24px',
+                    borderRadius: '12px',
+                    border: selectedLanguage === 'ko'
+                      ? `2px solid ${scheme.border}`
+                      : '2px solid rgba(255, 255, 255, 0.2)',
+                    background: selectedLanguage === 'ko'
+                      ? 'rgba(255, 255, 255, 0.2)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: '#ffffff',
+                    fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: selectedLanguage === 'ko'
+                      ? `0 4px 12px ${scheme.glow}`
+                      : 'none',
+                  }}
+                >
+                  한국어
+                </motion.button>
               </div>
 
-              {/* Korean content */}
-              <div>
-                <div
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#fbbf24',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
+              {/* Content Cards */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedLanguage}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  🇰🇷 한국어
-                </div>
-                <p
-                  style={{
-                    fontSize: '0.95rem',
-                    lineHeight: 1.8,
-                    color: '#e0e7ff',
-                    margin: 0,
-                    whiteSpace: 'pre-line',
-                  }}
-                >
-                  {category.content.ko}
-                </p>
-              </div>
+                  {getSentences(category.content[selectedLanguage]).map((sentence, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        marginBottom: '12px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>
+                        {sentenceIcons[i % sentenceIcons.length]}
+                      </span>
+                      <p
+                        style={{
+                          fontSize: selectedLanguage === 'en' ? 'clamp(0.9rem, 2vw, 1.05rem)' : 'clamp(0.85rem, 1.8vw, 1rem)',
+                          lineHeight: 1.7,
+                          color: '#ffffff',
+                          margin: 0,
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                        }}
+                      >
+                        {sentence}
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </motion.div>
         </>

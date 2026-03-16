@@ -23,7 +23,7 @@ export function usePreloadTTS() {
         // Collect all greetings with their voice assignments
         const allGreetings = [
           ...characterGreetings.luna.map(text => ({ text, voice: 'nova' })),
-          ...characterGreetings.noir.map(text => ({ text, voice: 'onyx' })),
+          ...characterGreetings.noir.map(text => ({ text, voice: 'alloy' })),
         ]
 
         const total = allGreetings.length

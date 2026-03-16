@@ -1,8 +1,8 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { characterData, getCharacterInfo } from '../../data/characterData'
-import { getRandomGreeting } from '../../data/characterGreetings'
+import { getRandomGreeting, greetingManager } from '../../data/characterGreetings'
 import { usePreloadTTS } from '../../hooks/usePreloadTTS'
 import Orb from '../common/Orb'
 import InfoPanel from '../common/InfoPanel'
@@ -11,6 +11,147 @@ import MagicButton from '../common/MagicButton'
 import TTSPlayer from '../common/TTSPlayer'
 import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
+
+/**
+ * Continuous Loading Animation - No stage breaks, smooth text transitions
+ */
+const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
+  const [frameIndex, setFrameIndex] = useState(0)
+
+  // Sprite animation - runs continuously without interruption
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrameIndex((prev) => (prev + 1) % 16)
+    }, 100) // 10fps
+    return () => clearInterval(interval)
+  }, [])
+
+  const getSpritePosition = (index) => {
+    const row = Math.floor(index / 4)
+    const col = index % 4
+    return `${(col * 100) / 3}% ${(row * 100) / 3}%`
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '2rem',
+        position: 'relative',
+      }}
+    >
+      {/* Luna Flying Sprite - Continuous animation */}
+      <motion.div
+        animate={{
+          y: [0, -20, 0], // Bouncing flight effect
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        style={{
+          width: '280px',
+          height: '320px',
+          backgroundImage: 'url(/luna-flying-sprite.png)',
+          backgroundSize: '400%',
+          backgroundPosition: getSpritePosition(frameIndex),
+          backgroundRepeat: 'no-repeat',
+          overflow: 'hidden',
+          filter: 'drop-shadow(0 8px 30px rgba(167, 139, 250, 0.6))',
+        }}
+      />
+
+      {/* Message - Only text changes, animation continues */}
+      <AnimatePresence mode="wait">
+        <motion.h2
+          key={getMessage(ttsProgress)} // Re-render when message changes
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            fontSize: 'clamp(1.5rem, 3.5vw, 2rem)',
+            fontWeight: 700,
+            color: '#fde68a',
+            textAlign: 'center',
+            textShadow: `
+              0 0 40px rgba(0, 0, 0, 0.9),
+              0 2px 12px rgba(251, 191, 36, 0.8)
+            `,
+            margin: 0,
+          }}
+        >
+          {getMessage(ttsProgress)}
+        </motion.h2>
+      </AnimatePresence>
+
+      {/* Soft glow particles - appear in final stage (67-100%) */}
+      <AnimatePresence>
+        {ttsProgress >= 67 && (
+          <>
+            {/* Ambient glow around character */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '400px',
+                height: '400px',
+                background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%)',
+                borderRadius: '50%',
+                pointerEvents: 'none',
+                filter: 'blur(40px)',
+              }}
+            />
+
+            {/* Small floating particles using particle-star.svg */}
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  y: [0, -60],
+                  x: [0, (i % 2 === 0 ? 20 : -20)],
+                }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: i * 0.7,
+                  ease: 'easeOut',
+                }}
+                style={{
+                  position: 'absolute',
+                  left: `${25 + i * 10}%`,
+                  top: '70%',
+                  width: '32px',
+                  height: '32px',
+                  backgroundImage: 'url(/particle-star.svg)',
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  pointerEvents: 'none',
+                }}
+              />
+            ))}
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 /**
  * Character Introduction Page
@@ -35,6 +176,10 @@ const CharacterPage = ({ onExit }) => {
     if (tab === activeTab) return
     playSelect()
     audioControl?.onSFXPlay()
+
+    // Reset greeting queue for previous character
+    greetingManager.reset(activeTab)
+
     setActiveTab(tab)
     setSelectedOrb(null)
     setGreeting(null)
@@ -80,18 +225,19 @@ const CharacterPage = ({ onExit }) => {
   // Layout: Symmetrical left-right arrangement
   // Top row: 2 orbs (left & right) - increased margin from edges
   // Middle row: 2 orbs (left & right) - avoiding BGM button
+  // Updated for 140px Orb size (previously 120px)
   const lunaOrbPositions = [
-    { top: '180px', left: '200px', delay: 0 },     // 🔮 Style - Top Left (+50px margin)
-    { top: '180px', right: '200px', delay: 0.1 },  // 💫 Reading Style - Top Right (+50px margin)
-    { top: '420px', left: '150px', delay: 0.2 },   // ⚡ Specialty - Middle Left (+50px margin)
-    { top: '420px', right: '150px', delay: 0.3 },  // 🌙 Tools - Middle Right (+50px margin, avoids BGM)
+    { top: '170px', left: '180px', delay: 0 },     // 🔮 Style - Top Left (adjusted for 140px Orb)
+    { top: '170px', right: '180px', delay: 0.1 },  // 💫 Reading Style - Top Right (adjusted for 140px Orb)
+    { top: '430px', left: '140px', delay: 0.2 },   // ⚡ Specialty - Middle Left (adjusted for 140px Orb)
+    { top: '430px', right: '140px', delay: 0.3 },  // 🌙 Tools - Middle Right (adjusted for 140px Orb, avoids BGM)
   ]
 
   const noirOrbPositions = [
-    { top: '180px', left: '200px', delay: 0 },
-    { top: '180px', right: '200px', delay: 0.1 },
-    { top: '420px', left: '150px', delay: 0.2 },
-    { top: '420px', right: '150px', delay: 0.3 },
+    { top: '170px', left: '180px', delay: 0 },
+    { top: '170px', right: '180px', delay: 0.1 },
+    { top: '430px', left: '140px', delay: 0.2 },
+    { top: '430px', right: '140px', delay: 0.3 },
   ]
 
   const orbPositions = activeTab === 'luna' ? lunaOrbPositions : noirOrbPositions
@@ -101,82 +247,199 @@ const CharacterPage = ({ onExit }) => {
   const backgroundImage = activeTab === 'luna' ? '/luna-background.png' : '/noir-background.png'
 
   // TTS voice based on active character
-  const ttsVoice = activeTab === 'luna' ? 'nova' : 'onyx'
-  // nova: Friendly, warm female voice (Luna)
-  // onyx: Deep, authoritative male voice (Noir)
+  const ttsVoice = activeTab === 'luna' ? 'nova' : 'alloy'
+  // nova: Bright, energetic female voice (Luna)
+  // alloy: Neutral, smooth young voice (Noir)
+
+  // Notify parent when character page is ready (activity finished)
+  useEffect(() => {
+    if (ttsReady) {
+      //console.error('컨텐츠 마지막 페이지 확인!! ');
+      // 컨텐츠의 마지막 페이지에서 실행
+      window.parent.postMessage({
+        op: 'contentFinished',
+        data: {},
+        from: 'child'
+      }, '*');
+    }
+  }, [ttsReady])
 
   // Show loading screen while TTS is preloading
   if (!ttsReady) {
+    // Get message based on progress
+    const getMessage = (progress) => {
+      if (progress < 34) return "Let's ride the magic broom!"
+      if (progress < 67) return "I can see Luna and Noir's house!"
+      return "Almost there! Are you ready?"
+    }
+    // Calculate filled stars (3 total)
+    const filledStars = Math.min(3, Math.ceil(ttsProgress / 34))
+    const stars = Array.from({ length: 3 }, (_, i) => i < filledStars)
+
     return (
       <div
         style={{
           width: '100%',
           height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-          color: '#ffffff',
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'radial-gradient(ellipse at 50% 0%, #2d1b69 0%, #0d0821 60%)',
         }}
       >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          style={{ marginBottom: '24px' }}
-        >
-          <Sparkles size={48} color="#fbbf24" />
-        </motion.div>
-        <h2
-          style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            marginBottom: '12px',
-            color: '#fbbf24',
-          }}
-        >
-          Loading Character Voices...
-        </h2>
-        <p
-          style={{
-            fontSize: '1.1rem',
-            color: '#c4b5fd',
-            marginBottom: '8px',
-          }}
-        >
-          {ttsProgress}%
-        </p>
+        {/* Background - Layer 1: Mystical pattern */}
         <div
           style={{
-            width: '300px',
-            height: '8px',
-            background: 'rgba(167, 139, 250, 0.2)',
-            borderRadius: '4px',
-            overflow: 'hidden',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: -2,
+            backgroundImage: 'url(/mystical-pattern.svg)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '512px 512px',
+            opacity: 0.3,
           }}
-        >
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${ttsProgress}%` }}
-            transition={{ duration: 0.3 }}
-            style={{
-              height: '100%',
-              background: 'linear-gradient(90deg, #7c3aed, #fbbf24)',
-              borderRadius: '4px',
-            }}
-          />
-        </div>
-        <p
+        />
+
+        {/* Background - Layer 2: Light rays */}
+        <div
           style={{
-            marginTop: '20px',
-            fontSize: '0.9rem',
-            color: '#a78bfa',
-            textAlign: 'center',
-            maxWidth: '400px',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: -1,
+            backgroundImage: 'url(/light-rays.svg)',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center top',
+            backgroundSize: 'cover',
+            opacity: 0.5,
+          }}
+        />
+
+
+        {/* Main content - Continuous animation */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '2.5rem',
           }}
         >
-          ✨ Preparing magical voices for instant playback...
-        </p>
+          {/* Continuous Loading Animation - No stage breaks */}
+          <ContinuousLoadingAnimation getMessage={getMessage} ttsProgress={ttsProgress} />
+
+          {/* Broom flight path indicator - Shooting stars */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '24px',
+              alignItems: 'center',
+            }}
+          >
+            {stars.map((isFilled, i) => (
+              <motion.div
+                key={i}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{
+                  scale: isFilled ? 1 : 0.7,
+                  opacity: isFilled ? 1 : 0.25,
+                }}
+                transition={{
+                  duration: 0.4,
+                  ease: 'easeOut',
+                }}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  position: 'relative',
+                }}
+              >
+                {/* Shooting star SVG */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: 'url(/shooting-star.svg)',
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    filter: isFilled
+                      ? 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.9)) brightness(1.2)'
+                      : 'grayscale(0.8) opacity(0.4)',
+                    transition: 'filter 0.3s ease',
+                  }}
+                />
+
+                {/* Passing glow effect when filled */}
+                {isFilled && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.8, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 0.5,
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '70px',
+                      height: '70px',
+                      background: 'radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%)',
+                      borderRadius: '50%',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Dot loader (same as LoadingOverlay) */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '0.5rem' }}>
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  background: '#a78bfa',
+                }}
+                animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.25 }}
+              />
+            ))}
+          </div>
+
+          {/* Subtle hint */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.7 }}
+            transition={{ delay: 1 }}
+            style={{
+              fontSize: '0.85rem',
+              color: '#a78bfa',
+              textAlign: 'center',
+              marginTop: '8px',
+              fontFamily: 'Nunito, sans-serif',
+              fontWeight: 600,
+            }}
+          >
+            Just a moment, please...
+          </motion.p>
+        </div>
       </div>
     )
   }
@@ -326,7 +589,7 @@ const CharacterPage = ({ onExit }) => {
               <p
                 style={{
                   color: '#c4b5fd',
-                  fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+                  fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
                   margin: 0,
                   fontWeight: 600,
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6)',
@@ -368,7 +631,7 @@ const CharacterPage = ({ onExit }) => {
                         ? 'linear-gradient(135deg, #7c3aed, #a78bfa)'
                         : 'transparent',
                       color: '#ffffff',
-                      fontSize: '0.9rem',
+                      fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
                       fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -377,7 +640,7 @@ const CharacterPage = ({ onExit }) => {
                         : 'none',
                     }}
                   >
-                    ✨ Luna
+                    Luna
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -391,7 +654,7 @@ const CharacterPage = ({ onExit }) => {
                         ? 'linear-gradient(135deg, #1e3a8a, #60a5fa)'
                         : 'transparent',
                       color: '#ffffff',
-                      fontSize: '0.9rem',
+                      fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
                       fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -400,7 +663,7 @@ const CharacterPage = ({ onExit }) => {
                         : 'none',
                     }}
                   >
-                    🌟 Noir
+                    Noir
                   </motion.button>
                 </div>
               </div>
@@ -517,16 +780,25 @@ const CharacterPage = ({ onExit }) => {
               style={{
                 position: 'fixed',
                 bottom: '20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                color: '#a78bfa',
-                fontSize: '0.85rem',
+                left: '0',
+                right: '0',
+                margin: '0 auto',
+                width: 'fit-content',
+                color: '#fde68a',
+                fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
                 textAlign: 'center',
-                opacity: 0.8,
+                fontWeight: 600,
+                background: 'rgba(0, 0, 0, 0.6)',
+                padding: '10px 24px',
+                borderRadius: '20px',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
+                whiteSpace: 'nowrap',
                 zIndex: 30,
               }}
             >
-              Click the orbs to learn more • Tap the character for a greeting ✨
+              Click the orbs to learn more • Tap the character for a greeting
             </motion.p>
           </motion.div>
         </AnimatePresence>

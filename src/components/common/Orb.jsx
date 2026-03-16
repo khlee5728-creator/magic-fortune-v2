@@ -75,8 +75,8 @@ const Orb = ({ icon, label, color, onClick, delay = 0, type = 'magic' }) => {
       onClick={onClick}
       style={{
         position: 'relative',
-        width: '120px',
-        height: '120px',
+        width: '140px',
+        height: '140px',
         borderRadius: '50%',
         ...currentStyle,
         backdropFilter: 'blur(10px)',
@@ -85,11 +85,11 @@ const Orb = ({ icon, label, color, onClick, delay = 0, type = 'magic' }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '8px',
+        gap: '6px',
         border: 'none',
         outline: 'none',
         padding: 0,
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       {/* Glowing highlight effect */}
@@ -113,8 +113,8 @@ const Orb = ({ icon, label, color, onClick, delay = 0, type = 'magic' }) => {
           src={iconSrc}
           alt={label}
           style={{
-            width: '70px',
-            height: '70px',
+            width: '80px',
+            height: '80px',
             position: 'relative',
             zIndex: 1,
             filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))',
@@ -129,15 +129,18 @@ const Orb = ({ icon, label, color, onClick, delay = 0, type = 'magic' }) => {
       {/* Label */}
       <span
         style={{
-          fontSize: '0.75rem',
+          fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
           fontWeight: 700,
           color: '#ffffff',
           textAlign: 'center',
           textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
           position: 'relative',
           zIndex: 1,
-          maxWidth: '90px',
-          lineHeight: 1.2,
+          maxWidth: '120px',
+          lineHeight: 1.1,
+          whiteSpace: 'normal',
+          wordBreak: 'break-word',
+          display: 'block',
         }}
       >
         {label}

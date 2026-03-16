@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { RotateCcw, Scroll, Star, Eye, Loader2 } from 'lucide-react'
 import TTSPlayer from '../common/TTSPlayer'
 import MagicButton from '../common/MagicButton'
+import useSFX from '../../hooks/useSFX'
 
 const TOTAL_CARDS = 10
 const TENSES = ['past', 'present', 'future']
@@ -42,10 +43,29 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
   const [revealStep, setRevealStep] = useState(0)
   const [phase, setPhase] = useState('selection') // 'selection' | 'revealing' | 'complete'
 
+  // Sound effects
+  const sfx = useSFX()
+
+  // Notify parent when all cards are revealed (activity finished)
+  useEffect(() => {
+    if (phase === 'complete') {
+      //console.error('컨텐츠 마지막 페이지 확인!! ');
+      // 컨텐츠의 마지막 페이지에서 실행
+      window.parent.postMessage({
+        op: 'contentFinished',
+        data: {},
+        from: 'child'
+      }, '*');
+    }
+  }, [phase])
+
   const handleCardClick = (cardIdx) => {
     if (phase !== 'selection') return
     if (selectedOrder.includes(cardIdx)) return
     if (selectedOrder.length >= 3) return
+
+    // Play card tap sound effect
+    sfx.playCardTap()
 
     const next = [...selectedOrder, cardIdx]
     setSelectedOrder(next)
@@ -54,7 +74,10 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
       // Brief pause so user can see FUTURE badge, then transition to reveal
       setTimeout(() => {
         setPhase('revealing')
-        setTimeout(() => setRevealStep(1), 400)
+        setTimeout(() => {
+          sfx.playCardFlip() // Play flip sound for first card
+          setRevealStep(1)
+        }, 400)
       }, 700)
     }
   }
@@ -69,7 +92,10 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
       // Short pause before flipping the next card.
       // Functional updater with Math.max ensures revealStep never decreases,
       // so re-listens on any card never cause already-flipped cards to unflip.
-      setTimeout(() => setRevealStep(prev => Math.max(prev, orderIdx + 2)), 250)
+      setTimeout(() => {
+        sfx.playCardFlip() // Play flip sound for next card
+        setRevealStep(prev => Math.max(prev, orderIdx + 2))
+      }, 250)
     }
   }
 
@@ -108,7 +134,7 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
       >
         <h2
           className="font-magic text-gold-shine"
-          style={{ fontSize: '1.8rem', margin: 0, fontWeight: 700 }}
+          style={{ fontSize: 'clamp(1.75rem, 4vw, 2.2rem)', margin: 0, fontWeight: 700 }}
         >
           {phase === 'selection'
             ? `Choose your ${selPrompt.tense} card (${selectedOrder.length}/3)`
@@ -178,11 +204,11 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
         </>
       )}
 
-      {/* Try Again — always rendered to reserve height */}
+      {/* Play Again — always rendered to reserve height */}
       <div style={{ visibility: phase === 'complete' ? 'visible' : 'hidden' }}>
         <MagicButton onClick={onTryAgain} variant="secondary" size="md">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <RotateCcw size={16} /> Try Again
+            <RotateCcw size={16} /> Play Again
           </span>
         </MagicButton>
       </div>
@@ -273,7 +299,7 @@ const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
       >
         <span className="font-magic" style={{
           color: '#1a0b3d',
-          fontSize: 'clamp(0.85rem, 2vw, 1.05rem)',
+          fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
           fontWeight: 900,
           letterSpacing: '0.15em',
         }}>
@@ -388,7 +414,7 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                     style={{ color: colors.label, opacity: 0.8 }}
                   />
                   <p style={{
-                    fontSize: '0.7rem',
+                    fontSize: '0.75rem',
                     color: colors.label,
                     opacity: 0.7,
                     margin: 0,
@@ -426,8 +452,9 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  height: '40%',
-                  background: 'linear-gradient(transparent, #0d0821)',
+                  height: '30%',
+                  background: 'linear-gradient(to bottom, transparent 0%, transparent 33%, rgba(13,8,33,0.3) 67%, #0d0821 100%)',
+                  pointerEvents: 'none',
                 }}
               />
             </div>
@@ -450,7 +477,7 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                     color: 'white',
                     fontFamily: 'Nunito, sans-serif',
                     fontWeight: 700,
-                    fontSize: 'clamp(0.85rem, 1.9vw, 1.1rem)',
+                    fontSize: 'clamp(0.9rem, 2vw, 1.05rem)',
                     lineHeight: 1.4,
                     margin: 0,
                     textAlign: 'center',
@@ -477,7 +504,7 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
         }}
       >
         {isFlipped && (
-          <TTSPlayer text={cleanText} autoPlay size="sm" onEnded={onAudioEnded} />
+          <TTSPlayer text={cleanText} voice="nova" autoPlay size="sm" onEnded={onAudioEnded} />
         )}
       </div>
     </motion.div>
@@ -535,7 +562,7 @@ const TarotTimeline = ({ revealStep }) => {
           <TenseIcon size={isCurrent ? 22 : 18} />
         </motion.div>
         <span style={{
-          fontSize: isCurrent ? '0.8rem' : '0.75rem',
+          fontSize: '0.75rem',
           fontFamily: 'Nunito, sans-serif', fontWeight: 800,
           letterSpacing: '0.1em',
           color: (isRevealed || isCurrent) ? colors.label : 'rgba(255,255,255,0.25)',

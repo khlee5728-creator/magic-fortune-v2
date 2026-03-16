@@ -168,10 +168,23 @@ function App() {
   }, [bgm, isBGMEnabled, tarotPrefetch])
 
   const handleTryAgain = useCallback(() => {
+    // 플랫폼에 Play Again 알림 전송
+    window.parent.postMessage({
+      op: 'playAgain',
+      data: {},
+      from: 'child'
+    }, '*');
+
     setAiContent(null)
     setMode(null)
     setAppState('intro')
-  }, [])
+
+    // Automatically start Prefetch for next tarot attempt
+    // This optimizes 2nd+ attempts while avoiding waste on 1st attempt
+    setTimeout(() => {
+      handleTarotHover()
+    }, 500) // Small delay to let intro page render first
+  }, [handleTarotHover])
 
   const handleCharacterExit = useCallback(() => {
     setAppState('intro')
@@ -261,7 +274,7 @@ function App() {
         <AnimatePresence mode="wait">
           {appState === 'intro' && (
             <motion.div key="intro" {...PAGE_VARIANTS} style={{ width: '100%', height: '100%' }}>
-              <IntroPage onStart={handleStart} onTarotHover={handleTarotHover} />
+              <IntroPage onStart={handleStart} />
             </motion.div>
           )}
 

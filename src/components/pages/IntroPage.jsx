@@ -27,7 +27,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 20 } },
 }
 
-const IntroPage = ({ onStart, onTarotHover }) => {
+const IntroPage = ({ onStart }) => {
   const audioControl = useContext(AudioContext)
 
   // Sound effects
@@ -43,13 +43,6 @@ const IntroPage = ({ onStart, onTarotHover }) => {
     audioControl?.onSFXPlay() // Duck background music briefly
     // Small delay to let sound effect play before transition
     setTimeout(() => onStart(mode), 100)
-  }
-
-  // Prefetch handler for tarot hover
-  const handleTarotCardHover = () => {
-    if (onTarotHover) {
-      onTarotHover()
-    }
   }
 
   return (
@@ -85,7 +78,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
           background: 'rgba(59, 130, 246, 0.15)',
           border: '2px solid rgba(147, 197, 253, 0.4)',
           backdropFilter: 'blur(10px)',
-          fontSize: '0.9rem',
+          fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
           fontWeight: 600,
           color: '#bfdbfe',
           cursor: 'pointer',
@@ -163,9 +156,10 @@ const IntroPage = ({ onStart, onTarotHover }) => {
           <h1
             className="font-magic text-gold-shine"
             style={{
-              fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
               margin: 0,
               lineHeight: 1.2,
+              fontWeight: 900,
               textShadow:
                 '0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.3), 0 2px 4px rgba(0, 0, 0, 0.5)',
             }}
@@ -175,7 +169,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
           <p
             style={{
               color: '#c4b5fd',
-              fontSize: 'clamp(0.85rem, 2vw, 1.1rem)',
+              fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
               marginTop: '0.75rem',
               fontFamily: 'Nunito, sans-serif',
               fontWeight: 600,
@@ -276,7 +270,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
                   className="font-magic"
                   style={{
                     color: '#fde68a',
-                    fontSize: '1.1rem',
+                    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
                     fontWeight: 700,
                     textShadow: '0 2px 8px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3)',
                   }}
@@ -286,7 +280,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
                 <div
                   style={{
                     color: '#c4b5fd',
-                    fontSize: '0.8rem',
+                    fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
                     marginTop: '0.25rem',
                     textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
                   }}
@@ -309,8 +303,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
             }}
             whileTap={{ scale: 0.96 }}
             onClick={() => handleCardClick('tarot')}
-            onMouseEnter={handleTarotCardHover}
-              style={{
+            style={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -372,7 +365,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
                   className="font-magic"
                   style={{
                     color: '#fde68a',
-                    fontSize: '1.1rem',
+                    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
                     fontWeight: 700,
                     textShadow: '0 2px 8px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3)',
                   }}
@@ -382,7 +375,7 @@ const IntroPage = ({ onStart, onTarotHover }) => {
                 <div
                   style={{
                     color: '#c4b5fd',
-                    fontSize: '0.8rem',
+                    fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
                     marginTop: '0.25rem',
                     textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
                   }}

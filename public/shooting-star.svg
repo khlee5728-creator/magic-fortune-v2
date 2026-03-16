@@ -1,0 +1,110 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient for the star core -->
+    <radialGradient id="starCore" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#fef3c7;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#fde68a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0.9" />
+    </radialGradient>
+
+    <!-- Gradient for the tail -->
+    <linearGradient id="tailGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#7c3aed;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:0" />
+    </linearGradient>
+
+    <!-- Outer glow effect -->
+    <radialGradient id="outerGlow" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:#a78bfa;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Strong glow for tail -->
+    <filter id="tailGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer glow circle (largest) -->
+  <circle cx="80" cy="40" r="35" fill="url(#outerGlow)" opacity="0.6"/>
+
+  <!-- Tail streams (3 layers for depth) -->
+  <g filter="url(#tailGlow)">
+    <!-- Wide background tail -->
+    <path d="M 10 90 Q 40 70, 70 50 L 75 45 Q 45 65, 15 85 Z"
+          fill="url(#tailGradient)" opacity="0.5"/>
+
+    <!-- Medium tail -->
+    <path d="M 20 85 Q 45 65, 72 48 L 76 44 Q 50 60, 25 80 Z"
+          fill="url(#tailGradient)" opacity="0.7"/>
+
+    <!-- Thin bright tail -->
+    <path d="M 30 78 Q 52 60, 74 46 L 77 43 Q 55 57, 33 73 Z"
+          fill="url(#tailGradient)" opacity="0.9"/>
+  </g>
+
+  <!-- Star core with filter -->
+  <g filter="url(#glow)">
+    <!-- 8-pointed star shape -->
+    <!-- Top point -->
+    <path d="M 80 20 L 82 35 L 80 40 L 78 35 Z" fill="url(#starCore)"/>
+    <!-- Right point -->
+    <path d="M 100 40 L 85 42 L 80 40 L 85 38 Z" fill="url(#starCore)"/>
+    <!-- Bottom point -->
+    <path d="M 80 60 L 82 45 L 80 40 L 78 45 Z" fill="url(#starCore)"/>
+    <!-- Left point -->
+    <path d="M 60 40 L 75 42 L 80 40 L 75 38 Z" fill="url(#starCore)"/>
+
+    <!-- Diagonal points (NE, SE, SW, NW) -->
+    <path d="M 93 27 L 82 36 L 80 40 L 84 38 Z" fill="url(#starCore)"/>
+    <path d="M 93 53 L 82 44 L 80 40 L 84 42 Z" fill="url(#starCore)"/>
+    <path d="M 67 53 L 78 44 L 80 40 L 76 42 Z" fill="url(#starCore)"/>
+    <path d="M 67 27 L 78 36 L 80 40 L 76 38 Z" fill="url(#starCore)"/>
+
+    <!-- Center circle (brightest) -->
+    <circle cx="80" cy="40" r="8" fill="url(#starCore)"/>
+    <circle cx="80" cy="40" r="5" fill="#ffffff" opacity="0.9"/>
+    <circle cx="80" cy="40" r="2.5" fill="#ffffff"/>
+  </g>
+
+  <!-- Sparkle accents (small white dots that twinkle) -->
+  <circle cx="82" cy="28" r="1.5" fill="#ffffff" opacity="0.95">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="95" cy="38" r="1.2" fill="#ffffff" opacity="0.9">
+    <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="85" cy="52" r="1" fill="#ffffff" opacity="0.85">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="68" cy="42" r="1.3" fill="#ffffff" opacity="0.9">
+    <animate attributeName="opacity" values="1;0.5;1" dur="1.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Tail sparkles (along the trail) -->
+  <circle cx="45" cy="65" r="1" fill="#a78bfa" opacity="0.8">
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="55" r="0.8" fill="#a78bfa" opacity="0.7">
+    <animate attributeName="opacity" values="0.7;0.3;0.7" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="30" cy="75" r="1.2" fill="#7c3aed" opacity="0.6">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+</svg>
