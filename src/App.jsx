@@ -43,7 +43,7 @@ function App() {
   })
 
   // Background music (global, plays across pages)
-  const bgm = useBGM('/sounds/intro-ambient.mp3', {
+  const bgm = useBGM(`${import.meta.env.BASE_URL}sounds/intro-ambient.mp3`, {
     volume: 0.15,
     loop: true,
     autoPlay: false, // Start when user clicks a card

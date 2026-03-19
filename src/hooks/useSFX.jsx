@@ -20,10 +20,10 @@ const useSFX = () => {
   const audioControl = useContext(AudioContext)
 
   // Phase 1: Core sound effects
-  const cardTap = useSound('/sounds/card-select.mp3', { volume: 0.3 }) // Reuse intro card-select sound
-  const cardFlip = useSound('/sounds/card-flip.mp3', { volume: 0.4 })
-  const cookieCrack = useSound('/sounds/cookie-crack.mp3', { volume: 0.4 })
-  const magicReveal = useSound('/sounds/magic-reveal.mp3', { volume: 0.3 })
+  const cardTap = useSound(`${import.meta.env.BASE_URL}sounds/card-select.mp3`, { volume: 0.3 }) // Reuse intro card-select sound
+  const cardFlip = useSound(`${import.meta.env.BASE_URL}sounds/card-flip.mp3`, { volume: 0.4 })
+  const cookieCrack = useSound(`${import.meta.env.BASE_URL}sounds/cookie-crack.mp3`, { volume: 0.4 })
+  const magicReveal = useSound(`${import.meta.env.BASE_URL}sounds/magic-reveal.mp3`, { volume: 0.3 })
 
   /**
    * Wrapper function that ducks background music before playing sound effect

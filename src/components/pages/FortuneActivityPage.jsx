@@ -92,10 +92,10 @@ const FloatingCharacter = ({ revealed }) => {
 
   const pos = revealed ? REVEALED_POS : FLOAT_POSITIONS[posIdx]
   const srcs = revealed
-    ? ['/images/characters/fortune/fortune-char-reveal.png']
+    ? [`${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-reveal.png`]
     : [
-        '/images/characters/fortune/fortune-char-1.png', '/images/characters/fortune/fortune-char-2.png', '/images/characters/fortune/fortune-char-3.png',
-        '/images/characters/fortune/fortune-char-4.png', '/images/characters/fortune/fortune-char-5.png', '/images/characters/fortune/fortune-char-6.png',
+        `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-1.png`, `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-2.png`, `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-3.png`,
+        `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-4.png`, `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-5.png`, `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-6.png`,
       ]
 
   return (

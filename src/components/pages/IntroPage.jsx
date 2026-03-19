@@ -24,7 +24,7 @@ const preloadTarotImages = () => {
   for (let i = 0; i < priorityCount; i++) {
     const img = new Image()
     // Prefer WebP, browser will fallback to PNG if not supported
-    img.src = `/images/tarot/cards/card-${i}.webp`
+    img.src = `${import.meta.env.BASE_URL}images/tarot/cards/card-${i}.webp`
     images.push(img)
   }
 
@@ -32,7 +32,7 @@ const preloadTarotImages = () => {
   setTimeout(() => {
     for (let i = priorityCount; i < TAROT_CARD_COUNT; i++) {
       const img = new Image()
-      img.src = `/images/tarot/cards/card-${i}.webp`
+      img.src = `${import.meta.env.BASE_URL}images/tarot/cards/card-${i}.webp`
       images.push(img)
     }
   }, 1000)
@@ -53,7 +53,7 @@ const IntroPage = ({ onStart }) => {
   const audioControl = useContext(AudioContext)
 
   // Sound effects
-  const playSelect = useSound('/sounds/card-select.mp3', { volume: 0.5 })
+  const playSelect = useSound(`${import.meta.env.BASE_URL}sounds/card-select.mp3`, { volume: 0.5 })
 
   // Preload tarot card images on mount for faster transition
   useEffect(() => {
@@ -161,12 +161,12 @@ const IntroPage = ({ onStart }) => {
         <motion.div variants={item}>
           <CharacterVideo
             srcs={[
-              '/images/characters/fortune/fortune-char-1.png',
-              '/images/characters/fortune/fortune-char-2.png',
-              '/images/characters/fortune/fortune-char-3.png',
-              '/images/tarot/tarot-char-1.png',
-              '/images/tarot/tarot-char-2.png',
-              '/images/tarot/tarot-char-3.png',
+              `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-1.png`,
+              `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-2.png`,
+              `${import.meta.env.BASE_URL}images/characters/fortune/fortune-char-3.png`,
+              `${import.meta.env.BASE_URL}images/tarot/tarot-char-1.png`,
+              `${import.meta.env.BASE_URL}images/tarot/tarot-char-2.png`,
+              `${import.meta.env.BASE_URL}images/tarot/tarot-char-3.png`,
             ]}
             poseDuration={2000}
             panelStyle={{ width: '240px', height: '360px' }}

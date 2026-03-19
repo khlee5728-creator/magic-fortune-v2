@@ -33,9 +33,9 @@ const CharacterSprite = ({
   const dim = dimensions[size] || dimensions.lg
 
   // Image paths (WebP with PNG fallback)
-  const idleImage = `/images/characters/${character}/${character}-idle.webp`
-  const idleImagePng = `/images/characters/${character}/${character}-idle.png`
-  const spriteImage = `/images/characters/${character}/${character}-talking-sprite.webp`
+  const idleImage = `${import.meta.env.BASE_URL}images/characters/${character}/${character}-idle.webp`
+  const idleImagePng = `${import.meta.env.BASE_URL}images/characters/${character}/${character}-idle.png`
+  const spriteImage = `${import.meta.env.BASE_URL}images/characters/${character}/${character}-talking-sprite.webp`
 
   // Sprite sheet configuration
   // 4x4 grid (16 frames total)

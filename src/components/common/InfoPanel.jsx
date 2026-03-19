@@ -22,14 +22,14 @@ const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
 
   // Icon mapping: Emoji → Custom SVG file path (same as Orb.jsx)
   const iconMap = {
-    '✨': '/icons/luna/eye-icon.svg',           // Luna: About - 미래를 보는 눈
-    '🌙': '/icons/luna/moon-stars-icon.svg',    // Luna: Favorites - 별관찰+달
-    '🎭': '/icons/luna/smiley-wink-icon.svg',   // Luna: TMI - 귀여운 비밀
-    '🔮': '/icons/luna/cards-icon.svg',         // Luna: Items - 타로 카드
-    '🌟': '/icons/noir/star-icon.svg',          // Noir: Hunter - 빛나는 별
-    '🔔': '/icons/noir/bell-icon.svg',          // Noir: Favorites - 은방울
-    '💭': '/icons/noir/chat-circle-icon.svg',   // Noir: Logic - 생각 구름
-    '😺': '/icons/noir/cat-icon.svg',           // Noir: Moods - 고양이 얼굴
+    '✨': `${import.meta.env.BASE_URL}icons/luna/eye-icon.svg`,           // Luna: About - 미래를 보는 눈
+    '🌙': `${import.meta.env.BASE_URL}icons/luna/moon-stars-icon.svg`,    // Luna: Favorites - 별관찰+달
+    '🎭': `${import.meta.env.BASE_URL}icons/luna/smiley-wink-icon.svg`,   // Luna: TMI - 귀여운 비밀
+    '🔮': `${import.meta.env.BASE_URL}icons/luna/cards-icon.svg`,         // Luna: Items - 타로 카드
+    '🌟': `${import.meta.env.BASE_URL}icons/noir/star-icon.svg`,          // Noir: Hunter - 빛나는 별
+    '🔔': `${import.meta.env.BASE_URL}icons/noir/bell-icon.svg`,          // Noir: Favorites - 은방울
+    '💭': `${import.meta.env.BASE_URL}icons/noir/chat-circle-icon.svg`,   // Noir: Logic - 생각 구름
+    '😺': `${import.meta.env.BASE_URL}icons/noir/cat-icon.svg`,           // Noir: Moods - 고양이 얼굴
   }
 
   const iconSrc = iconMap[category.icon]

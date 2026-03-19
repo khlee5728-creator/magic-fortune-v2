@@ -61,7 +61,7 @@ const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
         style={{
           width: '224px',
           height: '256px',
-          backgroundImage: 'url(/images/characters/luna/luna-flying-sprite.webp)',
+          backgroundImage: `url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.webp)`,
           backgroundSize: '400%',
           backgroundPosition: getSpritePosition(frameIndex),
           backgroundRepeat: 'no-repeat',
@@ -170,7 +170,7 @@ const CharacterPage = ({ onExit }) => {
   const [isPlayingTTS, setIsPlayingTTS] = useState(false)
 
   const audioControl = useContext(AudioContext)
-  const playSelect = useSound('/sounds/card-select.mp3', { volume: 0.4 })
+  const playSelect = useSound(`${import.meta.env.BASE_URL}sounds/card-select.mp3`, { volume: 0.4 })
 
   // Preload all TTS audio for instant playback
   const { isReady: ttsReady, progress: ttsProgress } = usePreloadTTS()
@@ -250,7 +250,7 @@ const CharacterPage = ({ onExit }) => {
   const orbType = activeTab === 'luna' ? 'magic' : 'starry'
 
   // Background image based on active character (WebP with PNG fallback)
-  const backgroundImage = activeTab === 'luna' ? '/images/characters/luna/luna-background.webp' : '/images/characters/noir/noir-background.webp'
+  const backgroundImage = activeTab === 'luna' ? `${import.meta.env.BASE_URL}images/characters/luna/luna-background.webp` : `${import.meta.env.BASE_URL}images/characters/noir/noir-background.webp`
 
   // TTS voice based on active character
   const ttsVoice = activeTab === 'luna' ? 'nova' : 'alloy'

@@ -263,9 +263,9 @@ const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
   >
     {/* Character image */}
     <picture>
-      <source srcSet={`/images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
+      <source srcSet={`${import.meta.env.BASE_URL}images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
       <img
-        src={`/images/tarot/cards/card-${cardIdx}.png`}
+        src={`${import.meta.env.BASE_URL}images/tarot/cards/card-${cardIdx}.png`}
         alt={`Card ${cardIdx + 1}`}
         style={{
           position: 'absolute',
@@ -354,9 +354,9 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
             }}
           >
             <picture>
-              <source srcSet={`/images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
+              <source srcSet={`${import.meta.env.BASE_URL}images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
               <img
-                src={`/images/tarot/cards/card-${cardIdx}.png`}
+                src={`${import.meta.env.BASE_URL}images/tarot/cards/card-${cardIdx}.png`}
                 alt="Tarot card"
                 style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
               />
