@@ -92,10 +92,10 @@ const FloatingCharacter = ({ revealed }) => {
 
   const pos = revealed ? REVEALED_POS : FLOAT_POSITIONS[posIdx]
   const srcs = revealed
-    ? ['/fortune-char-reveal.png']
+    ? ['/images/characters/fortune/fortune-char-reveal.png']
     : [
-        '/fortune-char-1.png', '/fortune-char-2.png', '/fortune-char-3.png',
-        '/fortune-char-4.png', '/fortune-char-5.png', '/fortune-char-6.png',
+        '/images/characters/fortune/fortune-char-1.png', '/images/characters/fortune/fortune-char-2.png', '/images/characters/fortune/fortune-char-3.png',
+        '/images/characters/fortune/fortune-char-4.png', '/images/characters/fortune/fortune-char-5.png', '/images/characters/fortune/fortune-char-6.png',
       ]
 
   return (
@@ -169,8 +169,7 @@ const FortuneActivityPage = ({ content, onTryAgain }) => {
   // Notify parent when fortune is revealed (activity finished)
   useEffect(() => {
     if (revealed) {
-      //console.error('컨텐츠 마지막 페이지 확인!! ');
-      // 컨텐츠의 마지막 페이지에서 실행
+      // Notify parent that content has finished
       window.parent.postMessage({
         op: 'contentFinished',
         data: {},

@@ -49,8 +49,7 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
   // Notify parent when all cards are revealed (activity finished)
   useEffect(() => {
     if (phase === 'complete') {
-      //console.error('컨텐츠 마지막 페이지 확인!! ');
-      // 컨텐츠의 마지막 페이지에서 실행
+      // Notify parent that content has finished
       window.parent.postMessage({
         op: 'contentFinished',
         data: {},
@@ -263,19 +262,22 @@ const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
     aria-label={selected ? `Card selected (${TENSE_BADGE[orderIdx]?.label ?? orderIdx + 1})` : 'Select this card'}
   >
     {/* Character image */}
-    <img
-      src={`/images/tarot/card-${cardIdx}.png`}
-      alt={`Card ${cardIdx + 1}`}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        borderRadius: 0,
-        display: 'block',
-      }}
-    />
+    <picture>
+      <source srcSet={`/images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
+      <img
+        src={`/images/tarot/cards/card-${cardIdx}.png`}
+        alt={`Card ${cardIdx + 1}`}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          borderRadius: 0,
+          display: 'block',
+        }}
+      />
+    </picture>
 
     {/* Bottom gradient banner — tense label on selected card */}
     {selected && (
@@ -351,11 +353,14 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
               background: 'linear-gradient(145deg, #1a0b3d, #2d1b69)',
             }}
           >
-            <img
-              src={`/images/tarot/card-${cardIdx}.png`}
-              alt="Tarot card"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-            />
+            <picture>
+              <source srcSet={`/images/tarot/cards/card-${cardIdx}.webp`} type="image/webp" />
+              <img
+                src={`/images/tarot/cards/card-${cardIdx}.png`}
+                alt="Tarot card"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              />
+            </picture>
           </div>
 
           {/* ── Back face (revealed content, shown after flip) ── */}

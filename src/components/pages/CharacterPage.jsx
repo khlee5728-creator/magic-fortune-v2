@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Sparkles } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { characterData, getCharacterInfo } from '../../data/characterData'
 import { getRandomGreeting, greetingManager } from '../../data/characterGreetings'
 import { usePreloadTTS } from '../../hooks/usePreloadTTS'
@@ -11,6 +11,12 @@ import MagicButton from '../common/MagicButton'
 import TTSPlayer from '../common/TTSPlayer'
 import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
+
+// Import assets for proper path resolution with base: './'
+import mysticalPattern from '/images/effects/mystical-pattern.svg'
+import lightRays from '/images/effects/light-rays.svg'
+import particleStar from '/images/effects/particle-star.svg'
+import shootingStar from '/images/effects/shooting-star.svg'
 
 /**
  * Continuous Loading Animation - No stage breaks, smooth text transitions
@@ -53,9 +59,9 @@ const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
           ease: 'easeInOut',
         }}
         style={{
-          width: '280px',
-          height: '320px',
-          backgroundImage: 'url(/luna-flying-sprite.png)',
+          width: '224px',
+          height: '256px',
+          backgroundImage: 'url(/images/characters/luna/luna-flying-sprite.webp)',
           backgroundSize: '400%',
           backgroundPosition: getSpritePosition(frameIndex),
           backgroundRepeat: 'no-repeat',
@@ -139,7 +145,7 @@ const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
                   top: '70%',
                   width: '32px',
                   height: '32px',
-                  backgroundImage: 'url(/particle-star.svg)',
+                  backgroundImage: `url(${particleStar})`,
                   backgroundSize: 'contain',
                   backgroundRepeat: 'no-repeat',
                   pointerEvents: 'none',
@@ -243,8 +249,8 @@ const CharacterPage = ({ onExit }) => {
   const orbPositions = activeTab === 'luna' ? lunaOrbPositions : noirOrbPositions
   const orbType = activeTab === 'luna' ? 'magic' : 'starry'
 
-  // Background image based on active character
-  const backgroundImage = activeTab === 'luna' ? '/luna-background.png' : '/noir-background.png'
+  // Background image based on active character (WebP with PNG fallback)
+  const backgroundImage = activeTab === 'luna' ? '/images/characters/luna/luna-background.webp' : '/images/characters/noir/noir-background.webp'
 
   // TTS voice based on active character
   const ttsVoice = activeTab === 'luna' ? 'nova' : 'alloy'
@@ -254,8 +260,7 @@ const CharacterPage = ({ onExit }) => {
   // Notify parent when character page is ready (activity finished)
   useEffect(() => {
     if (ttsReady) {
-      //console.error('컨텐츠 마지막 페이지 확인!! ');
-      // 컨텐츠의 마지막 페이지에서 실행
+      // Notify parent that content has finished loading
       window.parent.postMessage({
         op: 'contentFinished',
         data: {},
@@ -295,7 +300,7 @@ const CharacterPage = ({ onExit }) => {
             width: '100%',
             height: '100%',
             zIndex: -2,
-            backgroundImage: 'url(/mystical-pattern.svg)',
+            backgroundImage: `url(${mysticalPattern})`,
             backgroundRepeat: 'repeat',
             backgroundSize: '512px 512px',
             opacity: 0.3,
@@ -311,7 +316,7 @@ const CharacterPage = ({ onExit }) => {
             width: '100%',
             height: '100%',
             zIndex: -1,
-            backgroundImage: 'url(/light-rays.svg)',
+            backgroundImage: `url(${lightRays})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center top',
             backgroundSize: 'cover',
@@ -368,7 +373,7 @@ const CharacterPage = ({ onExit }) => {
                   style={{
                     width: '100%',
                     height: '100%',
-                    backgroundImage: 'url(/shooting-star.svg)',
+                    backgroundImage: `url(${shootingStar})`,
                     backgroundSize: 'contain',
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center',
@@ -485,7 +490,7 @@ const CharacterPage = ({ onExit }) => {
           width: '100%',
           height: '100%',
           zIndex: -2,
-          backgroundImage: 'url(/mystical-pattern.svg)',
+          backgroundImage: `url(${mysticalPattern})`,
           backgroundRepeat: 'repeat',
           backgroundSize: '512px 512px',
           opacity: 0.3,
@@ -501,7 +506,7 @@ const CharacterPage = ({ onExit }) => {
           width: '100%',
           height: '100%',
           zIndex: -1,
-          backgroundImage: 'url(/light-rays.svg)',
+          backgroundImage: `url(${lightRays})`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center top',
           backgroundSize: 'cover',

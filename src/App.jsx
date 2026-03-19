@@ -66,7 +66,9 @@ function App() {
     // Skip if already prefetching or prefetch completed
     if (tarotPrefetch || tarotAbortController.current) return
 
-    console.log('[Prefetch] Tarot hover detected, starting generation...')
+    if (import.meta.env.DEV) {
+      console.log('[Prefetch] Tarot hover detected, starting generation...')
+    }
 
     // Create AbortController to cancel if user hovers away
     const controller = new AbortController()
@@ -77,7 +79,9 @@ function App() {
       const messages = await generateTarotText()
 
       if (controller.signal.aborted) {
-        console.log('[Prefetch] Aborted after text generation')
+        if (import.meta.env.DEV) {
+          console.log('[Prefetch] Aborted after text generation')
+        }
         return
       }
 
@@ -85,11 +89,15 @@ function App() {
       const images = await generateTarotImages(messages)
 
       if (controller.signal.aborted) {
-        console.log('[Prefetch] Aborted after image generation')
+        if (import.meta.env.DEV) {
+          console.log('[Prefetch] Aborted after image generation')
+        }
         return
       }
 
-      console.log('[Prefetch] Completed, caching results')
+      if (import.meta.env.DEV) {
+        console.log('[Prefetch] Completed, caching results')
+      }
       setTarotPrefetch({ messages, images })
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -133,13 +141,17 @@ function App() {
       let messages, images
 
       if (tarotPrefetch) {
-        console.log('[Tarot] Using prefetched data (instant!)')
+        if (import.meta.env.DEV) {
+          console.log('[Tarot] Using prefetched data (instant!)')
+        }
         messages = tarotPrefetch.messages
         images = tarotPrefetch.images
         setTarotPrefetch(null) // Clear cache
         tarotAbortController.current = null
       } else {
-        console.log('[Tarot] No prefetch, generating fresh')
+        if (import.meta.env.DEV) {
+          console.log('[Tarot] No prefetch, generating fresh')
+        }
         try {
           // Generate text first (includes scene descriptions)
           messages = await generateTarotText()

@@ -32,9 +32,10 @@ const CharacterSprite = ({
   }
   const dim = dimensions[size] || dimensions.lg
 
-  // Image paths
-  const idleImage = `/${character}-idle.png`
-  const spriteImage = `/${character}-talking-sprite.png`
+  // Image paths (WebP with PNG fallback)
+  const idleImage = `/images/characters/${character}/${character}-idle.webp`
+  const idleImagePng = `/images/characters/${character}/${character}-idle.png`
+  const spriteImage = `/images/characters/${character}/${character}-talking-sprite.webp`
 
   // Sprite sheet configuration
   // 4x4 grid (16 frames total)
@@ -69,9 +70,7 @@ const CharacterSprite = ({
         }}
       >
         {/* Static idle image */}
-        <motion.img
-          src={idleImage}
-          alt={`${character} character`}
+        <motion.picture
           animate={{
             opacity: isTalking ? 0 : 1,
             scale: isTalking ? 0.98 : 1,
@@ -87,11 +86,21 @@ const CharacterSprite = ({
             left: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'bottom center',
             pointerEvents: 'none',
           }}
-        />
+        >
+          <source srcSet={idleImage} type="image/webp" />
+          <img
+            src={idleImagePng}
+            alt={`${character} character`}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              objectPosition: 'bottom center',
+            }}
+          />
+        </motion.picture>
 
         {/* Sprite sheet animation (only visible when talking) */}
         <motion.div

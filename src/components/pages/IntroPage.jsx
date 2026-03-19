@@ -6,15 +6,37 @@ import MagicButton from '../common/MagicButton'
 import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
 
-// Preload tarot card images for faster rendering
+// Import assets for proper path resolution with base: './'
+import mysticalPattern from '/images/effects/mystical-pattern.svg'
+import lightRays from '/images/effects/light-rays.svg'
+import tarotCardIcon from '/icons/tarot-card-icon.svg'
+
+// Preload tarot card images for faster rendering (WebP with PNG fallback)
 const TAROT_CARD_COUNT = 10
+
 const preloadTarotImages = () => {
   const images = []
-  for (let i = 0; i < TAROT_CARD_COUNT; i++) {
+
+  // Lazy preload strategy: only preload first 3 cards immediately
+  // Remaining cards will be loaded on-demand when user interacts
+  const priorityCount = 3
+
+  for (let i = 0; i < priorityCount; i++) {
     const img = new Image()
-    img.src = `/images/tarot/card-${i}.png`
+    // Prefer WebP, browser will fallback to PNG if not supported
+    img.src = `/images/tarot/cards/card-${i}.webp`
     images.push(img)
   }
+
+  // Preload remaining cards with low priority (after a delay)
+  setTimeout(() => {
+    for (let i = priorityCount; i < TAROT_CARD_COUNT; i++) {
+      const img = new Image()
+      img.src = `/images/tarot/cards/card-${i}.webp`
+      images.push(img)
+    }
+  }, 1000)
+
   return images
 }
 
@@ -102,7 +124,7 @@ const IntroPage = ({ onStart }) => {
           width: '100%',
           height: '100%',
           zIndex: -2,
-          backgroundImage: 'url(/mystical-pattern.svg)',
+          backgroundImage: `url(${mysticalPattern})`,
           backgroundRepeat: 'repeat',
           backgroundSize: '512px 512px',
           opacity: 0.4,
@@ -116,7 +138,7 @@ const IntroPage = ({ onStart }) => {
           width: '100%',
           height: '100%',
           zIndex: -1,
-          backgroundImage: 'url(/light-rays.svg)',
+          backgroundImage: `url(${lightRays})`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center top',
           backgroundSize: 'cover',
@@ -139,12 +161,12 @@ const IntroPage = ({ onStart }) => {
         <motion.div variants={item}>
           <CharacterVideo
             srcs={[
-              '/fortune-char-1.png',
-              '/fortune-char-2.png',
-              '/fortune-char-3.png',
-              '/tarot-char-1.png',
-              '/tarot-char-2.png',
-              '/tarot-char-3.png',
+              '/images/characters/fortune/fortune-char-1.png',
+              '/images/characters/fortune/fortune-char-2.png',
+              '/images/characters/fortune/fortune-char-3.png',
+              '/images/tarot/tarot-char-1.png',
+              '/images/tarot/tarot-char-2.png',
+              '/images/tarot/tarot-char-3.png',
             ]}
             poseDuration={2000}
             panelStyle={{ width: '240px', height: '360px' }}
@@ -245,7 +267,7 @@ const IntroPage = ({ onStart }) => {
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  backgroundImage: 'url(/mystical-pattern.svg)',
+                  backgroundImage: `url(${mysticalPattern})`,
                   backgroundSize: '256px 256px',
                   opacity: 0.1,
                   pointerEvents: 'none',
@@ -342,7 +364,7 @@ const IntroPage = ({ onStart }) => {
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  backgroundImage: 'url(/mystical-pattern.svg)',
+                  backgroundImage: `url(${mysticalPattern})`,
                   backgroundSize: '256px 256px',
                   opacity: 0.1,
                   pointerEvents: 'none',
@@ -355,7 +377,7 @@ const IntroPage = ({ onStart }) => {
                 justifyContent: 'center'
               }}>
                 <img
-                  src="/tarot-card-icon.svg"
+                  src={tarotCardIcon}
                   alt="Tarot Card"
                   style={{ width: '70px', height: '98px', filter: 'drop-shadow(0 4px 12px rgba(167, 139, 250, 0.4))' }}
                 />

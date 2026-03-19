@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Import assets for proper path resolution with base: './'
+import lunaShuffleSprite from '/images/characters/luna/luna-tarot-shuffle-sprite.png'
+
 const MESSAGES = {
   fortune: 'Creating your magical fortune cookie...',
   tarot: [
@@ -67,9 +70,9 @@ const TarotShuffleAnimation = ({ getMessage }) => {
         animate={{ y: [0, -15, 0] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         style={{
-          width: '300px',
-          height: '326px', // 300 * (477/439) = 326 to maintain aspect ratio
-          backgroundImage: 'url(/luna-tarot-shuffle-sprite.png)',
+          width: '240px',
+          height: '261px', // 240 * (477/439) = 261 to maintain aspect ratio
+          backgroundImage: `url(${lunaShuffleSprite})`,
           backgroundSize: '400% 400%',
           backgroundPosition: getSpritePosition(frameIndex),
           backgroundRepeat: 'no-repeat',

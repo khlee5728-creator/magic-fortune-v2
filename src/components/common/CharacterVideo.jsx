@@ -53,12 +53,10 @@ const CharacterVideo = ({ srcs = [], style = {}, panelStyle = {}, poseDuration =
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         style={{ width: '100%', height: '100%', position: 'relative' }}
       >
-        {/* Pose crossfade — AnimatePresence switches between PNG files */}
+        {/* Pose crossfade — AnimatePresence switches between image files */}
         <AnimatePresence mode="wait">
-          <motion.img
+          <motion.picture
             key={poseIndex}
-            src={poses[poseIndex]}
-            alt="character"
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
@@ -68,13 +66,26 @@ const CharacterVideo = ({ srcs = [], style = {}, panelStyle = {}, poseDuration =
               inset: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'contain',
-              objectPosition: 'bottom center',
-              display: 'block',
               filter: 'drop-shadow(0 0 18px rgba(167,139,250,0.5)) drop-shadow(0 0 5px rgba(245,197,24,0.18))',
-              ...style,
             }}
-          />
+          >
+            <source
+              srcSet={poses[poseIndex]?.replace('.png', '.webp')}
+              type="image/webp"
+            />
+            <img
+              src={poses[poseIndex]}
+              alt="character"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'bottom center',
+                display: 'block',
+                ...style,
+              }}
+            />
+          </motion.picture>
         </AnimatePresence>
       </motion.div>
     </motion.div>

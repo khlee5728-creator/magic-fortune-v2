@@ -48,3 +48,6 @@ pnpm-debug.log*
 # Temporary files
 *.tmp
 *.temp
+
+# Image optimization backups
+_original-backup/

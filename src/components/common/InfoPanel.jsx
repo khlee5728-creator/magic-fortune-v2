@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
+// Import assets for proper path resolution with base: './'
+import mysticalPattern from '/images/effects/mystical-pattern.svg'
+
 /**
  * Slide-up Information Panel Component
  * Displays character information with bilingual content
@@ -109,7 +112,7 @@ const InfoPanel = ({ isOpen, onClose, category, characterType = 'luna' }) => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundImage: 'url(/mystical-pattern.svg)',
+                backgroundImage: `url(${mysticalPattern})`,
                 backgroundSize: '256px 256px',
                 opacity: 0.08,
                 pointerEvents: 'none',
