@@ -142,8 +142,7 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
 
     // First manual click (autoPlay=false path)
     setStatus('loading')
-    audioControl?.onTTSStart() // Duck background music before loading TTS
-    isDuckedRef.current = true // Mark as ducked
+    // Duck already called at line 120, no need to call again
     try {
       const url = await callTTS(text, voice)
       blobUrlRef.current = url

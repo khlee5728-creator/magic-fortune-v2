@@ -229,16 +229,16 @@ function App() {
     toggleBGM,
     // TTS playback handlers (only duck if BGM is enabled)
     onTTSStart: () => {
-      if (isBGMEnabled) bgm.duck(0.01, 500) // 1% volume - TTS가 최대한 또렷하게 들림
+      if (isBGMEnabled) bgm.duck(0.01, 2) // 1% volume, Priority 2 (TTS - highest)
     },
     onTTSEnd: () => {
-      if (isBGMEnabled) bgm.restore(800)
+      if (isBGMEnabled) bgm.restore(800, 2) // Priority 2 - only TTS can restore
     },
     // Sound effect playback handler (only duck if BGM is enabled)
     onSFXPlay: () => {
       if (isBGMEnabled) {
-        bgm.duck(0.08, 200)
-        setTimeout(() => bgm.restore(400), 300)
+        bgm.duck(0.05, 1)  // 5% volume, Priority 1 (SFX - lower than TTS)
+        setTimeout(() => bgm.restore(600, 1), 800)  // Priority 1 - won't restore during TTS
       }
     },
   }

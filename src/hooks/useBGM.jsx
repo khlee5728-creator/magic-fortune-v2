@@ -27,6 +27,8 @@ const useBGM = (
   const fadeIntervalRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const targetVolumeRef = useRef(volume) // Store original target volume
+  const isDuckingRef = useRef(false) // Track if BGM is currently ducked
+  const duckPriorityRef = useRef(0) // Track ducking priority (0=none, 1=SFX, 2=TTS)
 
   // Initialize audio
   useEffect(() => {
@@ -132,7 +134,10 @@ const useBGM = (
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          fadeIn(volume, fadeInDuration)
+          // Only fadeIn if not currently ducking (prevents volume jump during TTS)
+          if (!isDuckingRef.current) {
+            fadeIn(volume, fadeInDuration)
+          }
         })
         .catch(error => {
           console.debug('[useBGM] Play prevented:', error.message)
@@ -177,7 +182,7 @@ const useBGM = (
     const audio = audioRef.current
     if (!audio) return
 
-    const steps = 50
+    const steps = 30  // Reduced from 50 for faster response
     const stepDuration = duration / steps
     const currentVolume = audio.volume
     const volumeDelta = targetVolume - currentVolume
@@ -200,21 +205,28 @@ const useBGM = (
   }
 
   // Duck: Lower volume temporarily (for TTS or sound effects)
-  const duck = (targetVolume = 0.03, duration = 500) => {
+  const duck = (targetVolume = 0.03, priority = 0) => {
     const audio = audioRef.current
     if (!audio) return
 
-    // Immediately reduce to 33% of original volume for instant feedback
-    // This ensures BGM is noticeably lower when TTS starts playing
-    const immediateVolume = targetVolumeRef.current * 0.33  // e.g., 15% * 0.33 = 5%
-    audio.volume = Math.max(0.01, Math.min(1, immediateVolume))
+    // Ignore if current priority is higher (e.g., don't let SFX override TTS)
+    if (priority < duckPriorityRef.current) return
 
-    // Then smoothly fade to target volume (e.g., 1%)
-    fadeToVolume(targetVolume, duration)
+    duckPriorityRef.current = priority
+    isDuckingRef.current = true
+
+    // Instantly set volume (no fade) to prevent interference
+    clearInterval(fadeIntervalRef.current)
+    audio.volume = Math.max(0.01, Math.min(1, targetVolume))
   }
 
   // Restore: Return to original volume
-  const restore = (duration = 800) => {
+  const restore = (duration = 800, priority = 0) => {
+    // Only restore if priority matches or is higher (prevents SFX from restoring during TTS)
+    if (priority < duckPriorityRef.current) return
+
+    duckPriorityRef.current = 0
+    isDuckingRef.current = false
     fadeToVolume(targetVolumeRef.current, duration)
   }
 
