@@ -457,8 +457,8 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  height: '30%',
-                  background: 'linear-gradient(to bottom, transparent 0%, transparent 33%, rgba(13,8,33,0.3) 67%, #0d0821 100%)',
+                  height: '35%',
+                  background: 'linear-gradient(to bottom, transparent 0%, rgba(13,8,33,0.15) 25%, rgba(13,8,33,0.4) 50%, rgba(13,8,33,0.7) 75%, #0d0821 100%)',
                   pointerEvents: 'none',
                 }}
               />
