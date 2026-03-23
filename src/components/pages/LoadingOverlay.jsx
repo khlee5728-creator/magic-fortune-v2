@@ -72,14 +72,21 @@ const TarotShuffleAnimation = ({ getMessage }) => {
         style={{
           width: '240px',
           height: '261px', // 240 * (477/439) = 261 to maintain aspect ratio
-          backgroundImage: `url(${lunaShuffleSprite})`,
-          backgroundSize: '400% 400%',
-          backgroundPosition: getSpritePosition(frameIndex),
-          backgroundRepeat: 'no-repeat',
-          overflow: 'hidden',
+          overflow: 'hidden', // Prevent sprite sheet from showing adjacent frames
           filter: 'drop-shadow(0 8px 30px rgba(167, 139, 250, 0.6))',
         }}
-      />
+      >
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundImage: `url(${lunaShuffleSprite})`,
+            backgroundSize: '400% 400%',
+            backgroundPosition: getSpritePosition(frameIndex),
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      </motion.div>
 
       {/* Message - Changes with phase */}
       <AnimatePresence mode="wait">

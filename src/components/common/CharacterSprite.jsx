@@ -119,25 +119,34 @@ const CharacterSprite = ({
             left: 0,
             width: '100%',
             height: '100%',
-            overflow: 'hidden',
+            overflow: 'hidden', // Ensure sprite frames don't overflow
             pointerEvents: 'none',
           }}
         >
           <div
             style={{
+              position: 'relative',
               width: '100%',
               height: '100%',
-              backgroundImage: `url(${spriteImage})`,
-              backgroundSize: `${spriteColumns * 100}% ${spriteRows * 100}%`,
-              backgroundPosition: '0% 0%',
-              backgroundRepeat: 'no-repeat',
-              transform: 'scale(0.80) translateY(10%)',
-              transformOrigin: 'center center',
-              animation: isTalking
-                ? `sprite-talk-grid ${frameDuration * spriteFrames}s steps(1) infinite`
-                : 'none',
+              overflow: 'hidden', // Double overflow protection for scaled sprite
             }}
-          />
+          >
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${spriteImage})`,
+                backgroundSize: `${spriteColumns * 100}% ${spriteRows * 100}%`,
+                backgroundPosition: '0% 0%',
+                backgroundRepeat: 'no-repeat',
+                transform: 'scale(0.80) translateY(10%)',
+                transformOrigin: 'center center',
+                animation: isTalking
+                  ? `sprite-talk-grid ${frameDuration * spriteFrames}s steps(1) infinite`
+                  : 'none',
+              }}
+            />
+          </div>
         </motion.div>
 
         {/* Talking indicator sparkles */}
