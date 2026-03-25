@@ -42,6 +42,8 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
   // revealStep: 0=none flipped, 1=past flipped, 2=present flipped, 3=future flipped
   const [revealStep, setRevealStep] = useState(0)
   const [phase, setPhase] = useState('selection') // 'selection' | 'revealing' | 'complete'
+  // Track auto-play mode: true during initial card reveal sequence, false after user manually stops
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false)
 
   // Sound effects
   const sfx = useSFX()
@@ -73,6 +75,7 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
       // Brief pause so user can see FUTURE badge, then transition to reveal
       setTimeout(() => {
         setPhase('revealing')
+        setIsAutoPlaying(true) // Start auto-play mode
         setTimeout(() => {
           sfx.playCardFlip() // Play flip sound for first card
           setRevealStep(1)
@@ -87,6 +90,7 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
     if (orderIdx === 2) {
       // Future card done → all complete
       setPhase('complete')
+      setIsAutoPlaying(false) // End auto-play mode
     } else {
       // Short pause before flipping the next card.
       // Functional updater with Math.max ensures revealStep never decreases,
@@ -186,6 +190,7 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
               const tense     = tenseForOrder(orderIdx)
               const data      = content?.[tense]
               const isFlipped = orderIdx < revealStep
+              const isCurrentPlaying = orderIdx === revealStep - 1
 
               return (
                 <TarotRevealCard
@@ -196,6 +201,8 @@ const TarotActivityPage = ({ content, onTryAgain }) => {
                   delay={orderIdx * 0.2}
                   onAudioEnded={() => handleAudioEnded(orderIdx)}
                   cardIdx={cardIdx}
+                  isAutoPlaying={isAutoPlaying}
+                  isCurrentPlaying={isCurrentPlaying}
                 />
               )
             })}
@@ -314,7 +321,7 @@ const CardBack = ({ selected, orderIdx, onClick, cardIdx }) => (
 
 // ── Flipping result card ──────────────────────────────────────────────────────
 
-const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx }) => {
+const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx, isAutoPlaying, isCurrentPlaying }) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const colors    = TENSE_COLORS[tense]
   const text      = data?.text ?? '✨ A magical fortune awaits you!'
@@ -509,7 +516,14 @@ const TarotRevealCard = ({ tense, data, isFlipped, delay, onAudioEnded, cardIdx 
         }}
       >
         {isFlipped && (
-          <TTSPlayer text={cleanText} voice="nova" autoPlay size="sm" onEnded={onAudioEnded} />
+          <TTSPlayer
+            text={cleanText}
+            voice="nova"
+            autoPlay
+            size="sm"
+            onEnded={onAudioEnded}
+            disabled={isAutoPlaying && !isCurrentPlaying}
+          />
         )}
       </div>
     </motion.div>

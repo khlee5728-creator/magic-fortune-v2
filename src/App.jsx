@@ -11,7 +11,7 @@ import { generateFortuneCookieContent, generateTarotText, generateTarotImages } 
 import { getRandomFortune, getRandomTarot } from './data/fallbackMessages'
 import { saveActivity } from './utils/localStore'
 import { initScaling } from './utils/scaling'
-import useBGM from './hooks/useBGM'
+import useWebAudioBGM from './hooks/useWebAudioBGM'
 
 // AudioContext for global audio control
 export const AudioContext = createContext(null)
@@ -36,6 +36,9 @@ function App() {
   const [tarotPrefetch, setTarotPrefetch] = useState(null)
   const tarotAbortController = useRef(null)
 
+  // Global TTS manager: tracks currently playing TTS to prevent overlapping audio
+  const currentTTSPlayer = useRef(null)
+
   // Background music ON/OFF state (saved to localStorage)
   const [isBGMEnabled, setIsBGMEnabled] = useState(() => {
     const saved = localStorage.getItem('magic-fortune-bgm-enabled')
@@ -43,7 +46,8 @@ function App() {
   })
 
   // Background music (global, plays across pages)
-  const bgm = useBGM(`${import.meta.env.BASE_URL}sounds/intro-ambient.mp3`, {
+  // Using Web Audio API for iOS Safari compatibility
+  const bgm = useWebAudioBGM(`${import.meta.env.BASE_URL}sounds/intro-ambient.mp3`, {
     volume: 0.15,
     loop: true,
     autoPlay: false, // Start when user clicks a card
@@ -240,6 +244,18 @@ function App() {
         bgm.duck(0.05, 1)  // 5% volume, Priority 1 (SFX - lower than TTS)
         setTimeout(() => bgm.restore(600, 1), 800)  // Priority 1 - won't restore during TTS
       }
+    },
+    // Global TTS manager: prevent overlapping audio
+    registerTTSPlayer: (stopCallback) => {
+      // Stop previous TTS if any
+      if (currentTTSPlayer.current) {
+        currentTTSPlayer.current()
+      }
+      // Register new TTS stop callback
+      currentTTSPlayer.current = stopCallback
+    },
+    unregisterTTSPlayer: () => {
+      currentTTSPlayer.current = null
     },
   }
 

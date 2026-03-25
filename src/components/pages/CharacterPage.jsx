@@ -13,7 +13,6 @@ import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
 
 // Import assets for proper path resolution with base: './'
-import mysticalPattern from '/images/effects/mystical-pattern.svg'
 import lightRays from '/images/effects/light-rays.svg'
 import particleStar from '/images/effects/particle-star.svg'
 import shootingStar from '/images/effects/shooting-star.svg'
@@ -61,12 +60,16 @@ const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
         style={{
           width: '224px',
           height: '256px',
-          backgroundImage: `url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.webp)`,
+          // Multiple background-image for WebP fallback: try WebP first, fall back to PNG for older browsers
+          backgroundImage: `url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.webp), url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.png)`,
           backgroundSize: '400%',
           backgroundPosition: getSpritePosition(frameIndex),
           backgroundRepeat: 'no-repeat',
           overflow: 'hidden',
           filter: 'drop-shadow(0 8px 30px rgba(167, 139, 250, 0.6))',
+          imageRendering: '-webkit-optimize-contrast',  // Safari/iPad rendering optimization
+          transform: 'translateZ(0)',                    // GPU acceleration for smoother animation
+          backfaceVisibility: 'hidden',                  // Prevent rendering artifacts
         }}
       />
 
@@ -291,23 +294,7 @@ const CharacterPage = ({ onExit }) => {
           background: 'radial-gradient(ellipse at 50% 0%, #2d1b69 0%, #0d0821 60%)',
         }}
       >
-        {/* Background - Layer 1: Mystical pattern */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: -2,
-            backgroundImage: `url(${mysticalPattern})`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '512px 512px',
-            opacity: 0.3,
-          }}
-        />
-
-        {/* Background - Layer 2: Light rays */}
+        {/* Background - Light rays */}
         <div
           style={{
             position: 'absolute',
@@ -481,23 +468,7 @@ const CharacterPage = ({ onExit }) => {
         />
       </AnimatePresence>
 
-      {/* Background - Layer 1: Mystical pattern overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -2,
-          backgroundImage: `url(${mysticalPattern})`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '512px 512px',
-          opacity: 0.3,
-        }}
-      />
-
-      {/* Background - Layer 2: Light rays effect */}
+      {/* Background - Light rays effect */}
       <div
         style={{
           position: 'absolute',

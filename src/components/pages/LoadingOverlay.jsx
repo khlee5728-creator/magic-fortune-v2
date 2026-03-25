@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Import assets for proper path resolution with base: './'
-import lunaShuffleSprite from '/images/characters/luna/luna-tarot-shuffle-sprite.png'
+// Import WebP as default (modern browsers), PNG fallback provided via CSS for older browsers
+import lunaShuffleSprite from '/images/characters/luna/luna-tarot-shuffle-sprite.webp'
 
 const MESSAGES = {
   fortune: 'Creating your magical fortune cookie...',
@@ -70,8 +71,8 @@ const TarotShuffleAnimation = ({ getMessage }) => {
         animate={{ y: [0, -15, 0] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
         style={{
-          width: '240px',
-          height: '261px', // 240 * (477/439) = 261 to maintain aspect ratio
+          width: '224px',
+          height: '256px',
           overflow: 'hidden', // Prevent sprite sheet from showing adjacent frames
           filter: 'drop-shadow(0 8px 30px rgba(167, 139, 250, 0.6))',
         }}
@@ -80,10 +81,14 @@ const TarotShuffleAnimation = ({ getMessage }) => {
           style={{
             width: '100%',
             height: '100%',
-            backgroundImage: `url(${lunaShuffleSprite})`,
+            // Multiple background-image for WebP fallback: try WebP first, fall back to PNG for older browsers
+            backgroundImage: `url(${lunaShuffleSprite}), url(${import.meta.env.BASE_URL}images/characters/luna/luna-tarot-shuffle-sprite.png)`,
             backgroundSize: '400% 400%',
             backgroundPosition: getSpritePosition(frameIndex),
             backgroundRepeat: 'no-repeat',
+            imageRendering: '-webkit-optimize-contrast',  // Safari/iPad rendering optimization
+            transform: 'translateZ(0)',                    // GPU acceleration for smoother animation
+            backfaceVisibility: 'hidden',                  // Prevent rendering artifacts
           }}
         />
       </motion.div>
@@ -327,11 +332,11 @@ const MagicOrbAnimation = () => {
 const LoadingOverlay = ({ mode }) => {
   // Message getter for tarot mode (5 phases)
   const getTarotMessage = (phase) => {
-    if (phase === 1) return "Luna is preparing the mystical cards..."
-    if (phase === 2) return "Shuffling the deck with magic..."
+    if (phase === 1) return "Luna is preparing the mystical tarot cards..."
+    if (phase === 2) return "Shuffling the magical deck..."
     if (phase === 3) return "Drawing your Past card..."
     if (phase === 4) return "Revealing your Present and Future..."
-    return "Your fortune is complete!"
+    return "Your reading is complete!"
   }
 
   return (

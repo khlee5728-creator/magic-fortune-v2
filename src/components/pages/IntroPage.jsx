@@ -87,7 +87,10 @@ const IntroPage = ({ onStart }) => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{
+          scale: 1.08,
+          boxShadow: '0 6px 24px rgba(59, 130, 246, 0.5), 0 0 36px rgba(147, 197, 253, 0.25)'
+        }}
         whileTap={{ scale: 0.95 }}
         onClick={() => handleCardClick('character')}
         style={{
@@ -97,25 +100,26 @@ const IntroPage = ({ onStart }) => {
           zIndex: 50,
           padding: '10px 20px',
           borderRadius: '20px',
-          background: 'rgba(59, 130, 246, 0.15)',
-          border: '2px solid rgba(147, 197, 253, 0.4)',
+          background: 'rgba(59, 130, 246, 0.28)',
+          border: '2px solid rgba(147, 197, 253, 0.65)',
           backdropFilter: 'blur(10px)',
-          fontSize: 'clamp(0.8rem, 1.6vw, 0.95rem)',
-          fontWeight: 600,
+          fontSize: 'clamp(0.85rem, 1.7vw, 1rem)',
+          fontWeight: 700,
           color: '#bfdbfe',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+          boxShadow: '0 4px 16px rgba(59, 130, 246, 0.35), 0 0 24px rgba(147, 197, 253, 0.15)',
           transition: 'all 0.2s ease',
         }}
       >
-        <Users size={16} />
+        <Users size={18} />
         Luna & Noir
       </motion.button>
 
       {/* Background decorative elements */}
+      {/* Light rays */}
       <div
         style={{
           position: 'absolute',
@@ -124,20 +128,6 @@ const IntroPage = ({ onStart }) => {
           width: '100%',
           height: '100%',
           zIndex: -2,
-          backgroundImage: `url(${mysticalPattern})`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '512px 512px',
-          opacity: 0.4,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1,
           backgroundImage: `url(${lightRays})`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center top',
@@ -145,6 +135,37 @@ const IntroPage = ({ onStart }) => {
           opacity: 0.6,
         }}
       />
+
+      {/* Floating sparkle particles */}
+      {[...Array(12)].map((_, i) => (
+        <motion.div
+          key={`sparkle-${i}`}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0.8, 1.2, 0.8],
+            y: [0, -20, 0],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 3,
+            ease: 'easeInOut',
+          }}
+          style={{
+            position: 'absolute',
+            left: `${10 + Math.random() * 80}%`,
+            top: `${10 + Math.random() * 80}%`,
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, #fde68a, #fbbf24)',
+            boxShadow: '0 0 8px #fde68a',
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        />
+      ))}
+
       <motion.div
         variants={container}
         initial="hidden"
@@ -262,17 +283,6 @@ const IntroPage = ({ onStart }) => {
                   pointerEvents: 'none',
                 }}
               />
-              {/* Decorative pattern overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${mysticalPattern})`,
-                  backgroundSize: '256px 256px',
-                  opacity: 0.1,
-                  pointerEvents: 'none',
-                }}
-              />
               <div style={{
                 height: '100px',
                 display: 'flex',
@@ -356,17 +366,6 @@ const IntroPage = ({ onStart }) => {
                   WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                   WebkitMaskComposite: 'xor',
                   maskComposite: 'exclude',
-                  pointerEvents: 'none',
-                }}
-              />
-              {/* Decorative pattern overlay */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${mysticalPattern})`,
-                  backgroundSize: '256px 256px',
-                  opacity: 0.1,
                   pointerEvents: 'none',
                 }}
               />

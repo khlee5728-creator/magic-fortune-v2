@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from 'react'
 import { motion } from 'framer-motion'
-import { Volume2, Loader2, Square } from 'lucide-react'
+import { Volume2, Loader2, Square, Clock } from 'lucide-react'
 import { callTTS } from '../../api/openai'
 import { AudioContext } from '../../App'
 
@@ -8,11 +8,12 @@ import { AudioContext } from '../../App'
  * TTS Player Button
  *
  * autoPlay: immediately plays TTS when mounted.
+ * disabled: visually disables the button (grayscale, no hover effects)
  * Uses a `cancelled` flag so that if StrictMode (or unmount) fires the
  * cleanup before the async API call returns, the stale response is discarded
  * and no duplicate audio is created.
  */
-const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md', buttonStyle = {}, idleLabel = 'Listen' }) => {
+const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md', buttonStyle = {}, idleLabel = 'Listen', disabled = false }) => {
   const [status, setStatus] = useState('idle') // 'idle' | 'loading' | 'playing'
   const audioRef   = useRef(null)
   const blobUrlRef = useRef(null)
@@ -25,6 +26,8 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
   const stopAudio = () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
     window.speechSynthesis?.cancel()
+    // Unregister from global TTS manager
+    audioControl?.unregisterTTSPlayer()
   }
 
   // Revoke the cached URL — called only on unmount
@@ -62,6 +65,18 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
       audioControl?.onTTSStart()
       isDuckedRef.current = true // Mark as ducked
 
+      // Register stop callback with global TTS manager
+      audioControl?.registerTTSPlayer(() => {
+        if (!cancelled) {
+          stopAudio()
+          setStatus('idle')
+          if (isDuckedRef.current) {
+            audioControl?.onTTSEnd()
+            isDuckedRef.current = false
+          }
+        }
+      })
+
       try {
         const url = await callTTS(text, voice)
         if (cancelled) { URL.revokeObjectURL(url); return }   // ← stale, discard (cleanup handles restoration)
@@ -73,19 +88,24 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
             setStatus('idle')
             audioControl?.onTTSEnd() // Restore background music
             isDuckedRef.current = false // Unmark ducked state
+            audioControl?.unregisterTTSPlayer() // Unregister after playback ends
             onEnded?.()
           }
         }
         audio.onerror = () => {
           if (!cancelled) {
             isDuckedRef.current = false // Unmark ducked state on error
+            audioControl?.unregisterTTSPlayer() // Unregister on error
             speakFallback(onEnded)
           }
         }
         await audio.play()
         if (!cancelled) setStatus('playing')
       } catch {
-        if (!cancelled) speakFallback(onEnded)
+        if (!cancelled) {
+          audioControl?.unregisterTTSPlayer() // Unregister on error
+          speakFallback(onEnded)
+        }
       }
     })()
 
@@ -120,6 +140,14 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
     audioControl?.onTTSStart()
     isDuckedRef.current = true // Mark as ducked
 
+    // Register stop callback with global TTS manager
+    // When stopped by another TTS player, don't restore BGM (new player already ducked it)
+    audioControl?.registerTTSPlayer(() => {
+      stopAudio()
+      setStatus('idle')
+      isDuckedRef.current = false  // Reset state only, don't restore BGM
+    })
+
     // Re-listen: cached URL still valid — play immediately, no API call
     if (blobUrlRef.current) {
       const audio = new Audio(blobUrlRef.current)
@@ -128,11 +156,13 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
         setStatus('idle')
         audioControl?.onTTSEnd() // Restore background music
         isDuckedRef.current = false // Unmark ducked state
+        audioControl?.unregisterTTSPlayer() // Unregister after playback ends
         onEnded?.()
       }
       audio.onerror = () => {
         revokeUrl()
         isDuckedRef.current = false // Unmark ducked state on error
+        audioControl?.unregisterTTSPlayer() // Unregister on error
         speakFallback(onEnded)
       }
       setStatus('playing')
@@ -142,7 +172,7 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
 
     // First manual click (autoPlay=false path)
     setStatus('loading')
-    // Duck already called at line 120, no need to call again
+    // Duck already called above, no need to call again
     try {
       const url = await callTTS(text, voice)
       blobUrlRef.current = url
@@ -152,16 +182,19 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
         setStatus('idle')
         audioControl?.onTTSEnd() // Restore background music
         isDuckedRef.current = false // Unmark ducked state
+        audioControl?.unregisterTTSPlayer() // Unregister after playback ends
         onEnded?.()
       }
       audio.onerror = () => {
         isDuckedRef.current = false // Unmark ducked state on error
+        audioControl?.unregisterTTSPlayer() // Unregister on error
         speakFallback(onEnded)
       }
       await audio.play()
       setStatus('playing')
     } catch {
       isDuckedRef.current = false // Unmark ducked state on error
+      audioControl?.unregisterTTSPlayer() // Unregister on error
       speakFallback(onEnded)
     }
   }
@@ -176,8 +209,8 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
   return (
     <motion.button
       onClick={handleClick}
-      whileHover={{ scale: 1.06 }}
-      whileTap={{ scale: 0.94 }}
+      whileHover={disabled ? {} : { scale: 1.06 }}
+      whileTap={disabled ? {} : { scale: 0.94 }}
       animate={{ opacity: status === 'loading' ? 0.6 : 1 }}
       transition={{ duration: 0.25 }}
       style={{
@@ -193,23 +226,29 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
         fontFamily: 'Nunito, sans-serif',
         fontWeight: 700,
         fontSize: iconSize,
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
         backdropFilter: 'blur(6px)',
         width: buttonWidth,
         minHeight: '44px',
+        filter: disabled ? 'grayscale(1)' : 'none',
+        opacity: disabled ? 0.4 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
         ...buttonStyle,
       }}
-      aria-label={status === 'playing' ? 'Stop audio' : 'Play audio'}
+      aria-label={disabled ? 'Waiting for audio' : (status === 'playing' ? 'Stop audio' : 'Play audio')}
+      aria-disabled={disabled}
     >
       <span style={{ display: 'flex', alignItems: 'center' }}>
-        {status === 'idle'    && <Volume2 size={iconPx} />}
-        {status === 'loading' && <Loader2 size={iconPx} className="spin" />}
-        {status === 'playing' && <Square  size={iconPx} fill="currentColor" strokeWidth={0} />}
+        {disabled && <Clock size={iconPx} />}
+        {!disabled && status === 'idle'    && <Volume2 size={iconPx} />}
+        {!disabled && status === 'loading' && <Loader2 size={iconPx} className="spin" />}
+        {!disabled && status === 'playing' && <Square  size={iconPx} fill="currentColor" strokeWidth={0} />}
       </span>
-      <span style={{ fontSize: '0.85rem', letterSpacing: '0.02em' }}>
-        {status === 'idle'    && idleLabel}
-        {status === 'loading' && 'Loading…'}
-        {status === 'playing' && 'Stop'}
+      <span style={{ fontSize: '0.85rem', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+        {disabled && 'Wait'}
+        {!disabled && status === 'idle'    && idleLabel}
+        {!disabled && status === 'loading' && 'Loading…'}
+        {!disabled && status === 'playing' && 'Stop'}
       </span>
     </motion.button>
   )
