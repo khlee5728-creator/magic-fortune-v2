@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { characterData, getCharacterInfo } from '../../data/characterData'
@@ -60,18 +60,25 @@ const ContinuousLoadingAnimation = ({ getMessage, ttsProgress }) => {
         style={{
           width: '224px',
           height: '256px',
-          // Multiple background-image for WebP fallback: try WebP first, fall back to PNG for older browsers
-          backgroundImage: `url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.webp), url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.png)`,
-          backgroundSize: '400%',
-          backgroundPosition: getSpritePosition(frameIndex),
-          backgroundRepeat: 'no-repeat',
-          overflow: 'hidden',
+          overflow: 'hidden', // Prevent sprite sheet from showing adjacent frames
           filter: 'drop-shadow(0 8px 30px rgba(167, 139, 250, 0.6))',
-          imageRendering: '-webkit-optimize-contrast',  // Safari/iPad rendering optimization
-          transform: 'translateZ(0)',                    // GPU acceleration for smoother animation
-          backfaceVisibility: 'hidden',                  // Prevent rendering artifacts
         }}
-      />
+      >
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            // Multiple background-image for WebP fallback: try WebP first, fall back to PNG for older browsers
+            backgroundImage: `url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.webp), url(${import.meta.env.BASE_URL}images/characters/luna/luna-flying-sprite.png)`,
+            backgroundSize: '400%',
+            backgroundPosition: getSpritePosition(frameIndex),
+            backgroundRepeat: 'no-repeat',
+            imageRendering: '-webkit-optimize-contrast',  // Safari/iPad rendering optimization
+            transform: 'translateZ(0)',                    // GPU acceleration for smoother animation
+            backfaceVisibility: 'hidden',                  // Prevent rendering artifacts
+          }}
+        />
+      </motion.div>
 
       {/* Message - Only text changes, animation continues */}
       <AnimatePresence mode="wait">
@@ -175,6 +182,9 @@ const CharacterPage = ({ onExit }) => {
   const audioControl = useContext(AudioContext)
   const playSelect = useSound(`${import.meta.env.BASE_URL}sounds/card-select.mp3`, { volume: 0.4 })
 
+  // Ref for handling TTS stop callback (prevent animation loop on spam clicks)
+  const ttsStopCallbackRef = useRef(null) // Store TTS stop callback for cleanup
+
   // Preload all TTS audio for instant playback
   const { isReady: ttsReady, progress: ttsProgress } = usePreloadTTS()
 
@@ -186,6 +196,11 @@ const CharacterPage = ({ onExit }) => {
     playSelect()
     audioControl?.onSFXPlay()
 
+    // Stop current TTS if playing
+    if (ttsStopCallbackRef.current) {
+      ttsStopCallbackRef.current()
+    }
+
     // Reset greeting queue for previous character
     greetingManager.reset(activeTab)
 
@@ -193,6 +208,7 @@ const CharacterPage = ({ onExit }) => {
     setSelectedOrb(null)
     setGreeting(null)
     setIsPlayingTTS(false)
+    ttsStopCallbackRef.current = null
   }
 
   // Handle orb click
@@ -206,19 +222,27 @@ const CharacterPage = ({ onExit }) => {
   const handleTTSEnded = () => {
     setIsPlayingTTS(false)
     setGreeting(null) // Hide greeting text when audio ends
+    ttsStopCallbackRef.current = null // Clear callback reference
   }
 
   // Handle character click - instant greeting with pre-cached TTS
+  // Prevents animation loop on rapid clicks (especially for kids)
   const handleCharacterClick = () => {
-    if (isPlayingTTS) return
-
     playSelect()
     audioControl?.onSFXPlay()
+
+    // If TTS is already playing, stop it and replace with new greeting
+    // The key change on TTSPlayer will cause remount with new text
+    if (isPlayingTTS && ttsStopCallbackRef.current) {
+      // Stop current TTS - this will call handleTTSEnded via stopHandler
+      ttsStopCallbackRef.current()
+    }
 
     // Get random pre-written greeting
     const randomGreeting = getRandomGreeting(activeTab)
 
     // Set greeting immediately - TTS is already cached!
+    // If this is a new greeting (different text), TTSPlayer will remount due to key prop
     setGreeting(randomGreeting)
     setIsPlayingTTS(true)
 
@@ -259,6 +283,16 @@ const CharacterPage = ({ onExit }) => {
   const ttsVoice = activeTab === 'luna' ? 'nova' : 'alloy'
   // nova: Bright, energetic female voice (Luna)
   // alloy: Neutral, smooth young voice (Noir)
+
+  // Cleanup: Stop TTS on component unmount
+  useEffect(() => {
+    return () => {
+      // Stop any playing TTS when component unmounts
+      if (ttsStopCallbackRef.current) {
+        ttsStopCallbackRef.current()
+      }
+    }
+  }, [])
 
   // Notify parent when character page is ready (activity finished)
   useEffect(() => {
@@ -700,7 +734,7 @@ const CharacterPage = ({ onExit }) => {
               ))}
             </div>
 
-            {/* Greeting Display with TTS - Floating at bottom */}
+            {/* Greeting Display - Floating at bottom */}
             <AnimatePresence>
               {greeting && (
                 <motion.div
@@ -734,19 +768,27 @@ const CharacterPage = ({ onExit }) => {
                   >
                     {greeting}
                   </p>
-
-                  {/* Hidden TTS Player - auto-plays greeting audio */}
-                  <div style={{ display: 'none' }}>
-                    <TTSPlayer
-                      text={greeting}
-                      voice={ttsVoice}
-                      autoPlay={true}
-                      onEnded={handleTTSEnded}
-                    />
-                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* TTS Player - Moved outside AnimatePresence to prevent unmount issues */}
+            {/* Key changes on greeting to remount with new text, ensuring clean playback */}
+            {greeting && (
+              <div style={{ display: 'none' }}>
+                <TTSPlayer
+                  key={greeting} // Remount when greeting changes
+                  text={greeting}
+                  voice={ttsVoice}
+                  autoPlay={true}
+                  onEnded={handleTTSEnded}
+                  onStop={(stopFn) => {
+                    // Register stop callback for external control
+                    ttsStopCallbackRef.current = stopFn
+                  }}
+                />
+              </div>
+            )}
 
             {/* Instruction hint */}
             <motion.p

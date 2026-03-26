@@ -9,11 +9,12 @@ import { AudioContext } from '../../App'
  *
  * autoPlay: immediately plays TTS when mounted.
  * disabled: visually disables the button (grayscale, no hover effects)
+ * onStop: callback to register stop function (for external control)
  * Uses a `cancelled` flag so that if StrictMode (or unmount) fires the
  * cleanup before the async API call returns, the stale response is discarded
  * and no duplicate audio is created.
  */
-const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md', buttonStyle = {}, idleLabel = 'Listen', disabled = false }) => {
+const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, onStop, size = 'md', buttonStyle = {}, idleLabel = 'Listen', disabled = false }) => {
   const [status, setStatus] = useState('idle') // 'idle' | 'loading' | 'playing'
   const audioRef   = useRef(null)
   const blobUrlRef = useRef(null)
@@ -59,6 +60,25 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
 
     let cancelled = false
 
+    // Define stop handler for parent component control
+    const stopHandler = () => {
+      if (!cancelled) {
+        stopAudio()
+        setStatus('idle')
+        if (isDuckedRef.current) {
+          audioControl?.onTTSEnd()
+          isDuckedRef.current = false
+        }
+        // Call onEnded callback to ensure parent state is reset
+        onEnded?.()
+      }
+    }
+
+    // Register stop handler with parent via onStop callback
+    if (onStop) {
+      onStop(stopHandler)
+    }
+
     ;(async () => {
       setStatus('loading')
       // Duck background music before loading TTS
@@ -66,16 +86,7 @@ const TTSPlayer = ({ text, voice = 'nova', autoPlay = false, onEnded, size = 'md
       isDuckedRef.current = true // Mark as ducked
 
       // Register stop callback with global TTS manager
-      audioControl?.registerTTSPlayer(() => {
-        if (!cancelled) {
-          stopAudio()
-          setStatus('idle')
-          if (isDuckedRef.current) {
-            audioControl?.onTTSEnd()
-            isDuckedRef.current = false
-          }
-        }
-      })
+      audioControl?.registerTTSPlayer(stopHandler)
 
       try {
         const url = await callTTS(text, voice)

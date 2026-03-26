@@ -1,43 +1,39 @@
 /**
- * OpenAI Proxy API Client
- * Backend: https://devplayground.polarislabs.ai.kr/api
+ * OpenAI API Client with JWT Authentication
+ * Backend: Poly AI Playground API (configured via window.CONFIG)
  *
- * All OpenAI API calls are routed through this proxy to keep API keys secure.
+ * All OpenAI API calls are routed through the backend proxy with JWT token authentication.
  */
-const BASE_URL = 'https://devplayground.polarislabs.ai.kr/api'
+import { callOpenAIAPI } from '../utils/api'
 
 // ─── Low-level helpers ───────────────────────────────────────────────────────
 
 export async function callChat(messages, model = 'gpt-4o', temperature = 1.0) {
-  const res = await fetch(`${BASE_URL}/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages, temperature }),
+  const data = await callOpenAIAPI('/chat/completions', {
+    model,
+    messages,
+    temperature
   })
-  if (!res.ok) {
-    const err = await res.text().catch(() => res.statusText)
-    throw new Error(`Chat API ${res.status}: ${err}`)
+
+  if (!data) {
+    throw new Error('Chat API failed: No response data')
   }
-  const data = await res.json()
+
   return data.choices[0].message.content
 }
 
 async function callImage(prompt) {
-  const res = await fetch(`${BASE_URL}/images/generations`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'dall-e-3',
-      prompt,
-      n: 1,
-      size: '1024x1024',
-    }),
+  const data = await callOpenAIAPI('/images/generations', {
+    model: 'dall-e-3',
+    prompt,
+    n: 1,
+    size: '1024x1024'
   })
-  if (!res.ok) {
-    const err = await res.text().catch(() => res.statusText)
-    throw new Error(`Image API ${res.status}: ${err}`)
+
+  if (!data) {
+    throw new Error('Image API failed: No response data')
   }
-  const data = await res.json()
+
   return data.data[0].url
 }
 
@@ -57,16 +53,16 @@ export async function callTTS(text, voice = 'shimmer') {
     return URL.createObjectURL(ttsCache.get(cacheKey))
   }
 
-  const res = await fetch(`${BASE_URL}/audio/speech`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'tts-1', input: text, voice }),
+  const blob = await callOpenAIAPI('/audio/speech', {
+    model: 'tts-1',
+    input: text,
+    voice
   })
-  if (!res.ok) {
-    const err = await res.text().catch(() => res.statusText)
-    throw new Error(`TTS API ${res.status}: ${err}`)
+
+  if (!blob) {
+    throw new Error('TTS API failed: No response blob')
   }
-  const blob = await res.blob()
+
   ttsCache.set(cacheKey, blob)
   return URL.createObjectURL(blob)
 }
