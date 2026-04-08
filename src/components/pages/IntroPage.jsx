@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Sparkles, Users } from 'lucide-react'
 import CharacterVideo from '../common/CharacterVideo'
 import MagicButton from '../common/MagicButton'
+import AiGeneratedBanner from '../common/AiGeneratedBanner'
 import useSound from '../../hooks/useSound'
 import { AudioContext } from '../../App'
 
@@ -411,6 +412,22 @@ const IntroPage = ({ onStart }) => {
             </MagicButton>
           </motion.div>
         </motion.div>
+
+      </motion.div>
+
+      {/* AI Generated Content Notice - Bottom Right */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        style={{
+          position: 'absolute',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 50,
+        }}
+      >
+        <AiGeneratedBanner />
       </motion.div>
     </div>
   )
